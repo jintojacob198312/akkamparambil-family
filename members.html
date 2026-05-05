@@ -7,14 +7,10 @@
   <link rel="stylesheet" href="style.css" />
   <script src="family.js"></script>
   <style>
-    .page-header {
-      background: var(--dark); padding: 7rem 2rem 4rem;
-      text-align: center;
-    }
+    .page-header { background: var(--dark); padding: 7rem 2rem 4rem; text-align: center; }
     .page-header .section-tag { color: var(--gold); }
     .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: var(--white); font-weight: 400; }
     .page-header p { color: rgba(255,255,255,0.45); margin-top: 0.75rem; font-size: 16px; }
-
     .members-section { padding: 3rem 2rem 5rem; }
     .gen-label {
       font-family: var(--font-display); font-size: 28px; font-weight: 400;
@@ -28,6 +24,37 @@
       letter-spacing: 0.05em;
     }
     .no-results { text-align: center; padding: 4rem 2rem; color: var(--muted); font-style: italic; }
+
+    /* ── Deceased member styles ── */
+    .member-card.deceased {
+      background: #f7f5f0;
+      opacity: 0.82;
+    }
+    .member-card.deceased .member-avatar {
+      background: #4a4a4a;
+      border-color: rgba(0,0,0,0.15);
+      filter: grayscale(0.4);
+    }
+    .member-card.deceased .member-name {
+      color: #444;
+    }
+    .badge-memory {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #f0ede8; color: #666; border-radius: 20px;
+      padding: 4px 12px; font-size: 11px; font-weight: 500;
+      border: 1px solid rgba(0,0,0,0.1); margin-bottom: 10px;
+    }
+    .member-lifespan {
+      font-size: 12px; color: var(--muted); font-style: italic; margin-bottom: 8px;
+    }
+    /* Modal deceased banner */
+    .modal-deceased-banner {
+      display: flex; align-items: center; gap: 8px;
+      background: #f5f3ef; border-radius: 8px; padding: 10px 14px;
+      margin-bottom: 1rem; font-size: 13px; color: #666;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .modal-deceased-banner .cross { font-size: 16px; }
   </style>
 </head>
 <body>
@@ -64,10 +91,7 @@
       <button class="filter-btn" data-field="Education">Education</button>
       <button class="filter-btn" data-field="Engineering">Engineering</button>
     </div>
-
-    <div id="members-container">
-      <!-- populated by JS -->
-    </div>
+    <div id="members-container"></div>
   </div>
 </section>
 
@@ -75,24 +99,19 @@
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal">
     <button class="modal-close" id="modal-close">✕</button>
+    <div id="modal-deceased-banner" class="modal-deceased-banner" style="display:none">
+      <span class="cross">✝</span>
+      <span id="modal-deceased-text"></span>
+    </div>
     <div class="modal-avatar" id="modal-avatar"></div>
     <div class="modal-name" id="modal-name"></div>
     <div class="modal-nick" id="modal-nick"></div>
     <div class="modal-relation" id="modal-relation"></div>
     <p class="modal-bio" id="modal-bio"></p>
     <div class="modal-divider"></div>
-    <div class="modal-row">
-      <span class="modal-row-label">Location</span>
-      <span class="modal-row-value" id="modal-location"></span>
-    </div>
-    <div class="modal-row">
-      <span class="modal-row-label">Profession</span>
-      <span class="modal-row-value" id="modal-profession"></span>
-    </div>
-    <div class="modal-row" id="modal-born-row">
-      <span class="modal-row-label">Born</span>
-      <span class="modal-row-value" id="modal-born"></span>
-    </div>
+    <div class="modal-row"><span class="modal-row-label">Location</span><span class="modal-row-value" id="modal-location"></span></div>
+    <div class="modal-row"><span class="modal-row-label">Profession</span><span class="modal-row-value" id="modal-profession"></span></div>
+    <div class="modal-row"><span class="modal-row-label">Lifespan</span><span class="modal-row-value" id="modal-born"></span></div>
     <div class="modal-divider"></div>
     <div class="modal-contact" id="modal-contact"></div>
   </div>
@@ -105,12 +124,9 @@
 </footer>
 
 <script>
-let allMembers = [];
-
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
 }
-
 function getRelation(member, members) {
   if (!member.parentId) return member.spouseId ? 'Founding generation' : 'Family member';
   const parent = members.find(m => m.id === member.parentId);
@@ -121,29 +137,27 @@ function renderMembers(members, filter = 'all', query = '') {
   const container = document.getElementById('members-container');
   container.innerHTML = '';
 
-  let filtered = members.filter(m => {
+  const filtered = members.filter(m => {
     const matchField = filter === 'all' || m.field === filter;
-    const matchQuery = !query || m.name.toLowerCase().includes(query) || m.location.toLowerCase().includes(query) || m.profession.toLowerCase().includes(query);
+    const matchQuery = !query || m.name.toLowerCase().includes(query)
+      || m.location.toLowerCase().includes(query)
+      || m.profession.toLowerCase().includes(query);
     return matchField && matchQuery;
   });
 
-  if (filtered.length === 0) {
+  if (!filtered.length) {
     container.innerHTML = '<div class="no-results">No members found matching your search.</div>';
     return;
   }
 
   const byGen = {};
-  filtered.forEach(m => {
-    if (!byGen[m.generation]) byGen[m.generation] = [];
-    byGen[m.generation].push(m);
-  });
-
-  const genLabels = { 1: 'First Generation', 2: 'Second Generation', 3: 'Third Generation' };
+  filtered.forEach(m => { if (!byGen[m.generation]) byGen[m.generation] = []; byGen[m.generation].push(m); });
+  const genLabels = { 1:'First Generation', 2:'Second Generation', 3:'Third Generation' };
 
   Object.keys(byGen).sort().forEach(gen => {
     const label = document.createElement('div');
     label.className = 'gen-label';
-    label.innerHTML = `${genLabels[gen] || 'Generation ' + gen} <span>${byGen[gen].length} member${byGen[gen].length > 1 ? 's' : ''}</span>`;
+    label.innerHTML = `${genLabels[gen] || 'Generation '+gen} <span>${byGen[gen].length} member${byGen[gen].length>1?'s':''}</span>`;
     container.appendChild(label);
 
     const grid = document.createElement('div');
@@ -152,8 +166,11 @@ function renderMembers(members, filter = 'all', query = '') {
     byGen[gen].forEach(m => {
       const relation = getRelation(m, members);
       const initials = getInitials(m.name);
+      const isDeceased = !!m.died;
+      const age = m.died ? m.died - m.born : new Date().getFullYear() - m.born;
+
       const card = document.createElement('div');
-      card.className = 'member-card';
+      card.className = 'member-card' + (isDeceased ? ' deceased' : '');
       card.dataset.id = m.id;
       card.innerHTML = `
         <div class="member-gen">Gen ${m.generation}</div>
@@ -161,7 +178,10 @@ function renderMembers(members, filter = 'all', query = '') {
         <div class="member-name">${m.name}</div>
         ${m.nickname ? `<div class="member-nick">"${m.nickname}"</div>` : ''}
         <div class="member-relation">${relation}</div>
-        <div class="member-profession">${m.profession}</div>
+        ${isDeceased
+          ? `<div class="badge-memory">✝ In loving memory · ${m.born}–${m.died}</div>`
+          : `<div class="member-profession">${m.profession}</div>`
+        }
         <div class="member-location">${m.location}, ${m.country}</div>
       `;
       card.addEventListener('click', () => openModal(m, members));
@@ -175,63 +195,71 @@ function renderMembers(members, filter = 'all', query = '') {
 function openModal(m, members) {
   const initials = getInitials(m.name);
   const relation = getRelation(m, members);
+  const isDeceased = !!m.died;
 
-  document.getElementById('modal-avatar').innerHTML = m.photo ? `<img src="${m.photo}" alt="${m.name}">` : initials;
+  // Deceased banner
+  const banner = document.getElementById('modal-deceased-banner');
+  const bannerText = document.getElementById('modal-deceased-text');
+  if (isDeceased) {
+    banner.style.display = 'flex';
+    bannerText.textContent = `In loving memory · ${m.born} – ${m.died} · Aged ${m.died - m.born}`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  document.getElementById('modal-avatar').innerHTML = m.photo
+    ? `<img src="${m.photo}" alt="${m.name}">` : initials;
   document.getElementById('modal-name').textContent = m.name;
   document.getElementById('modal-nick').textContent = m.nickname ? `"${m.nickname}"` : '';
   document.getElementById('modal-relation').textContent = relation;
   document.getElementById('modal-bio').textContent = m.bio || '';
   document.getElementById('modal-location').textContent = `${m.location}, ${m.country}`;
   document.getElementById('modal-profession').textContent = `${m.profession} · ${m.field}`;
-  document.getElementById('modal-born').textContent = m.born + (m.died ? ` – ${m.died}` : '');
+  document.getElementById('modal-born').textContent = isDeceased
+    ? `${m.born} – ${m.died} (aged ${m.died - m.born})`
+    : `Born ${m.born}`;
 
-  // Contact
   const contactDiv = document.getElementById('modal-contact');
-  let contactHtml = `<div class="modal-contact-title">Contact</div>`;
-  if (m.contact && (m.contact.email || m.contact.phone || m.contact.whatsapp)) {
-    if (m.contact.email) contactHtml += `<a class="contact-btn" href="mailto:${m.contact.email}">✉ Email</a>`;
-    if (m.contact.phone) contactHtml += `<a class="contact-btn" href="tel:${m.contact.phone}">📞 Call</a>`;
-    if (m.contact.whatsapp) contactHtml += `<a class="contact-btn" href="https://wa.me/${m.contact.whatsapp.replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>`;
-  } else {
-    contactHtml += `<p class="locked-msg">Contact info not yet added. Ask the family admin to update.</p>`;
-  }
-  contactDiv.innerHTML = contactHtml;
+  let html = isDeceased
+    ? `<p class="locked-msg" style="font-style:italic;color:var(--muted)">✝ ${m.name.split(' ')[0]} is no longer with us. Their memory lives on in our family.</p>`
+    : `<div class="modal-contact-title">Contact</div>`;
 
+  if (!isDeceased) {
+    if (m.contact?.email || m.contact?.phone) {
+      if (m.contact.email) html += `<a class="contact-btn" href="mailto:${m.contact.email}">✉ Email</a>`;
+      if (m.contact.phone) html += `<a class="contact-btn" href="tel:${m.contact.phone}">📞 Call</a>`;
+      if (m.contact.whatsapp) html += `<a class="contact-btn" href="https://wa.me/${m.contact.whatsapp.replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>`;
+    } else {
+      html += `<p class="locked-msg">Contact info not yet added.</p>`;
+    }
+  }
+  contactDiv.innerHTML = html;
   document.getElementById('modal-overlay').classList.add('open');
 }
 
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-
-document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-close').addEventListener('click', () =>
+  document.getElementById('modal-overlay').classList.remove('open'));
 document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
+  if (e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
 });
 
-Promise.resolve({ members: FAMILY_MEMBERS })
-  .then(r => r.json())
-  .then(data => {
-    allMembers = data.members;
-    let currentFilter = 'all';
-    let currentQuery = '';
+// Boot — data from family.js
+let currentFilter = 'all', currentQuery = '';
+renderMembers(FAMILY_MEMBERS, currentFilter, currentQuery);
 
-    renderMembers(allMembers, currentFilter, currentQuery);
-
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentFilter = btn.dataset.field;
-        renderMembers(allMembers, currentFilter, currentQuery);
-      });
-    });
-
-    document.getElementById('search').addEventListener('input', e => {
-      currentQuery = e.target.value.toLowerCase();
-      renderMembers(allMembers, currentFilter, currentQuery);
-    });
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.field;
+    renderMembers(FAMILY_MEMBERS, currentFilter, currentQuery);
   });
+});
+document.getElementById('search').addEventListener('input', e => {
+  currentQuery = e.target.value.toLowerCase();
+  renderMembers(FAMILY_MEMBERS, currentFilter, currentQuery);
+});
 </script>
 </body>
 </html>
