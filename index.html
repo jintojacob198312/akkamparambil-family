@@ -6,6 +6,7 @@
   <title>Akkamparambil Family Portal</title>
   <meta name="description" content="The official family portal for the Akkamparambil family — connecting generations across the world." />
   <link rel="stylesheet" href="style.css" />
+  <script src="family.js"></script>
   <style>
     /* page-specific extras */
     .feature-grid {
@@ -161,7 +162,7 @@
 </footer>
 
 <script>
-fetch('family.json')
+Promise.resolve({ members: FAMILY_MEMBERS })
   .then(r => r.json())
   .then(data => {
     const members = data.members;

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>World Map · Akkamparambil</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="family.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     .page-header { background: var(--dark); padding: 7rem 2rem 2rem; text-align: center; }
@@ -113,7 +114,7 @@ const goldIcon = L.divIcon({
   iconSize: [14, 14], iconAnchor: [7, 7]
 });
 
-fetch('family.json')
+Promise.resolve({ members: FAMILY_MEMBERS })
   .then(r => r.json())
   .then(data => {
     const members = data.members;

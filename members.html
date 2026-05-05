@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Members · Akkamparambil Family</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="family.js"></script>
   <style>
     .page-header {
       background: var(--dark); padding: 7rem 2rem 4rem;
@@ -208,7 +209,7 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('modal-overlay')) closeModal();
 });
 
-fetch('family.json')
+Promise.resolve({ members: FAMILY_MEMBERS })
   .then(r => r.json())
   .then(data => {
     allMembers = data.members;

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Family Tree · Akkamparambil</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="family.js"></script>
   <style>
     body { background: var(--dark); }
     .page-header { background: var(--dark); padding: 7rem 2rem 2rem; text-align: center; }
@@ -89,134 +90,15 @@
 </footer>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════
-//  FAMILY DATA — edit this when you add new members
-//  Keep spouseId pointing to each other (husband ↔ wife)
-//  parentId = the blood parent's id (usually the father)
-//  generation: 1 = grandparents, 2 = parents, 3 = children
-// ═══════════════════════════════════════════════════════════════════
-const FAMILY_DATA = [
-  {
-    id: 1, name: "Krishnan Akkamparambil", nickname: "Appachan",
-    parentId: null, spouseId: 2, generation: 1,
-    born: 1940, died: 2010,
-    location: "Thrissur, Kerala", country: "India",
-    profession: "Farmer", field: "Agriculture",
-    bio: "The patriarch of our family. Known for his wisdom and warmth.",
-    photo: "", contact: { email: "", phone: "", whatsapp: "" }
-  },
-  {
-    id: 2, name: "Mariamma Akkamparambil", nickname: "Ammachi",
-    parentId: null, spouseId: 1, generation: 1,
-    born: 1945, died: null,
-    location: "Thrissur, Kerala", country: "India",
-    profession: "Homemaker", field: "Family",
-    bio: "The heart of our family. Her love and cooking are legendary.",
-    photo: "", contact: { email: "", phone: "", whatsapp: "" }
-  },
-  {
-    id: 3, name: "Jinto Jacob Akkamparambil", nickname: "Jinto",
-    parentId: 1, spouseId: 4, generation: 2,
-    born: 1968, died: null,
-    location: "Ernakulam, Kerala", country: "India",
-    profession: "Civil Engineer", field: "Engineering",
-    bio: "Built bridges — both literal and between family members.",
-    photo: "", contact: { email: "jinto@example.com", phone: "+91-9876543210", whatsapp: "+91-9876543210" }
-  },
-  {
-    id: 4, name: "Lisy Akkamparambil", nickname: "Lisy",
-    parentId: null, spouseId: 3, generation: 2,
-    born: 1972, died: null,
-    location: "Ernakulam, Kerala", country: "India",
-    profession: "School Teacher", field: "Education",
-    bio: "Dedicated educator, shaping young minds for over 20 years.",
-    photo: "", contact: { email: "", phone: "", whatsapp: "" }
-  },
-  {
-    id: 5, name: "Rajan Akkamparambil", nickname: "Raju",
-    parentId: 3, spouseId: null, generation: 3,
-    born: 1995, died: null,
-    location: "Bangalore, Karnataka", country: "India",
-    profession: "Software Engineer", field: "Technology",
-    bio: "Full-stack developer working at a leading tech company.",
-    photo: "", contact: { email: "rajan@example.com", phone: "", whatsapp: "" }
-  },
-  {
-    id: 6, name: "Priya Akkamparambil", nickname: "Priya",
-    parentId: 3, spouseId: null, generation: 3,
-    born: 1998, died: null,
-    location: "Thrissur, Kerala", country: "India",
-    profession: "Medical Student", field: "Medicine",
-    bio: "Aspiring doctor, currently in her final year of MBBS.",
-    photo: "", contact: { email: "", phone: "", whatsapp: "" }
-  },
-  {
-    id: 7, name: "Mohan Akkamparambil", nickname: "Mohan",
-    parentId: 1, spouseId: 8, generation: 2,
-    born: 1971, died: null,
-    location: "Dubai", country: "UAE",
-    profession: "Accountant", field: "Finance",
-    bio: "Finance professional based in Dubai for over 15 years.",
-    photo: "", contact: { email: "mohan@example.com", phone: "+971-501234567", whatsapp: "+971-501234567" }
-  },
-  {
-    id: 8, name: "Sunitha Akkamparambil", nickname: "Sunitha",
-    parentId: null, spouseId: 7, generation: 2,
-    born: 1974, died: null,
-    location: "Dubai", country: "UAE",
-    profession: "Nurse", field: "Healthcare",
-    bio: "Dedicated nurse with 18 years of experience in ICU care.",
-    photo: "", contact: { email: "", phone: "", whatsapp: "" }
-  },
-  {
-    id: 9, name: "Arun Akkamparambil", nickname: "Arun",
-    parentId: 7, spouseId: null, generation: 3,
-    born: 2000, died: null,
-    location: "Toronto", country: "Canada",
-    profession: "Business Student", field: "Business",
-    bio: "Studying MBA at University of Toronto.",
-    photo: "", contact: { email: "arun@example.com", phone: "", whatsapp: "" }
-  },
-  {
-    id: 10, name: "Balan Akkamparambil", nickname: "Balan",
-    parentId: 1, spouseId: 11, generation: 2,
-    born: 1975, died: null,
-    location: "London", country: "UK",
-    profession: "Chartered Accountant", field: "Finance",
-    bio: "CA with his own practice in East London.",
-    photo: "", contact: { email: "balan@example.com", phone: "+44-7890123456", whatsapp: "+44-7890123456" }
-  },
-  {
-    id: 11, name: "Ancy Akkamparambil", nickname: "Ancy",
-    parentId: null, spouseId: 10, generation: 2,
-    born: 1978, died: null,
-    location: "London", country: "UK",
-    profession: "Pharmacist", field: "Healthcare",
-    bio: "Senior pharmacist at an NHS hospital in London.",
-    photo: "", contact: { email: "", phone: "", whatsapp: "" }
-  },
-  {
-    id: 12, name: "Vijay Akkamparambil", nickname: "Viju",
-    parentId: 10, spouseId: null, generation: 3,
-    born: 2002, died: null,
-    location: "London", country: "UK",
-    profession: "CS Student", field: "Engineering",
-    bio: "Studying Computer Science at Imperial College London.",
-    photo: "", contact: { email: "", phone: "", whatsapp: "" }
-  }
-];
-// ═══════════════════════════════════════════════════════════════════
+// ── All data comes from family.js (loaded above via <script src>) ──
+// FAMILY_MEMBERS is available globally — no fetch needed.
 
-// ── Layout constants ──
 const NW = 114, NH = 54;
-const COUPLE_GAP = 22;
-const SIBLING_GAP = 38;
-const GEN_V = 145;
-const COUPLE_DROP = 12;
+const COUPLE_GAP = 22, SIBLING_GAP = 38, GEN_V = 145, COUPLE_DROP = 12;
 const GEN_COLORS = { 1:'#C9A84C', 2:'#5b8cdb', 3:'#5bc4a0' };
 const MARRIED_IN = '#1e1e2e';
 
-const byId = id => FAMILY_DATA.find(m => m.id === id);
+const byId = id => FAMILY_MEMBERS.find(m => m.id === id);
 const initials = n => n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
 const firstName = n => n.split(' ')[0];
 
@@ -227,7 +109,6 @@ function svgEl(tag, attrs, text) {
   return el;
 }
 
-// ── Build unit tree ──
 function buildUnits() {
   const seen = new Set();
   function make(m) {
@@ -238,22 +119,18 @@ function buildUnits() {
       const sp = byId(m.spouseId);
       if (sp && !seen.has(sp.id)) { seen.add(sp.id); unit.spouse = sp; }
     }
-    FAMILY_DATA
+    FAMILY_MEMBERS
       .filter(c => c.parentId === m.id)
       .forEach(c => { const u = make(c); if (u) unit.children.push(u); });
     return unit;
   }
-  // Roots: gen-1 blood members with no parentId
-  const roots = FAMILY_DATA.filter(m =>
-    !m.parentId && m.generation === 1 &&
-    (!m.spouseId || !FAMILY_DATA.find(o => o.spouseId === m.id && o.generation === 1 && !o.parentId && o.born < m.born))
+  const roots = FAMILY_MEMBERS.filter(m => !m.parentId && m.generation === 1 &&
+    (!m.spouseId || !FAMILY_MEMBERS.find(o => o.spouseId === m.id && o.generation === 1 && !o.parentId && o.born < m.born))
   );
-  // Fallback: any member with no parentId not yet seen
-  const fallback = FAMILY_DATA.filter(m => !m.parentId && !seen.has(m.id));
+  const fallback = FAMILY_MEMBERS.filter(m => !m.parentId && !seen.has(m.id));
   return [...roots, ...fallback].map(make).filter(Boolean);
 }
 
-// ── Measure ──
 function unitW(unit) {
   const selfW = unit.spouse ? NW + COUPLE_GAP + NW : NW;
   if (!unit.children.length) return selfW;
@@ -262,21 +139,18 @@ function unitW(unit) {
   return Math.max(selfW, childW);
 }
 
-// ── Place ──
 function place(unit, x, y) {
   const total = unitW(unit);
   const cx = x + total / 2;
   if (unit.spouse) {
     const lx = cx - NW - COUPLE_GAP / 2;
-    unit.blood.tx = lx;           unit.blood.ty = y;
+    unit.blood.tx = lx;                    unit.blood.ty = y;
     unit.spouse.tx = lx + NW + COUPLE_GAP; unit.spouse.ty = y;
   } else {
-    unit.blood.tx = cx - NW / 2;  unit.blood.ty = y;
+    unit.blood.tx = cx - NW / 2; unit.blood.ty = y;
   }
-  unit.jx = cx;
-  unit.jy = y + NH + COUPLE_DROP;
+  unit.jx = cx; unit.jy = y + NH + COUPLE_DROP;
   unit.tw = total; unit.tx = x; unit.ty = y;
-
   const childW = unit.children.reduce((s,c,i) =>
     s + unitW(c) + (i<unit.children.length-1?SIBLING_GAP:0), 0);
   let cx2 = x + (total - childW) / 2;
@@ -292,18 +166,12 @@ function layoutAll(units) {
   return x - SIBLING_GAP + 50;
 }
 
-// ── Render ──
 function render(units, totalW) {
   const svg = document.getElementById('tree-svg');
   svg.innerHTML = '';
-
   let maxY = 0;
-  function walkY(u) {
-    maxY = Math.max(maxY, u.blood.ty + NH + 20);
-    u.children.forEach(walkY);
-  }
+  function walkY(u) { maxY = Math.max(maxY, u.blood.ty + NH + 20); u.children.forEach(walkY); }
   units.forEach(walkY);
-
   svg.setAttribute('width', totalW);
   svg.setAttribute('height', maxY + 50);
   svg.setAttribute('viewBox', `0 0 ${totalW} ${maxY + 50}`);
@@ -314,97 +182,58 @@ function render(units, totalW) {
   function drawUnit(unit) {
     const { blood, spouse, jx, jy, children } = unit;
     const midY = blood.ty + NH / 2;
-
     if (spouse) {
-      // Gold marriage bar
       const x1 = blood.tx + NW, x2 = spouse.tx;
-      lG.appendChild(svgEl('line', { x1, y1:midY, x2, y2:midY,
-        stroke:'#C9A84C', 'stroke-width':2.5, 'stroke-linecap':'round' }));
-      lG.appendChild(svgEl('text', { x:(x1+x2)/2, y:midY+1,
-        'text-anchor':'middle', 'dominant-baseline':'central',
-        'font-size':10, fill:'#C9A84C', style:'font-family:sans-serif' }, '♥'));
-      // Dashed drop to child junction
-      lG.appendChild(svgEl('line', { x1:jx, y1:midY, x2:jx, y2:jy,
-        stroke:'#C9A84C', 'stroke-width':1.5, 'stroke-dasharray':'4 3' }));
+      lG.appendChild(svgEl('line', { x1, y1:midY, x2, y2:midY, stroke:'#C9A84C', 'stroke-width':2.5, 'stroke-linecap':'round' }));
+      lG.appendChild(svgEl('text', { x:(x1+x2)/2, y:midY+1, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':10, fill:'#C9A84C', style:'font-family:sans-serif' }, '♥'));
+      lG.appendChild(svgEl('line', { x1:jx, y1:midY, x2:jx, y2:jy, stroke:'#C9A84C', 'stroke-width':1.5, 'stroke-dasharray':'4 3' }));
     } else {
-      lG.appendChild(svgEl('line', { x1:jx, y1:blood.ty+NH, x2:jx, y2:jy,
-        stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
+      lG.appendChild(svgEl('line', { x1:jx, y1:blood.ty+NH, x2:jx, y2:jy, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
     }
-
     if (children.length) {
       const hBarY = jy + COUPLE_DROP;
       const xs = children.map(c => c.jx);
-      lG.appendChild(svgEl('line', { x1:jx, y1:jy, x2:jx, y2:hBarY,
-        stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
-      if (children.length > 1) {
-        lG.appendChild(svgEl('line', {
-          x1:Math.min(...xs), y1:hBarY, x2:Math.max(...xs), y2:hBarY,
-          stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
-      }
-      children.forEach(child => {
-        lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-8,
-          stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
-      });
+      lG.appendChild(svgEl('line', { x1:jx, y1:jy, x2:jx, y2:hBarY, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
+      if (children.length > 1) lG.appendChild(svgEl('line', { x1:Math.min(...xs), y1:hBarY, x2:Math.max(...xs), y2:hBarY, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
+      children.forEach(child => lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-8, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 })));
     }
-
     drawNode(blood, nG);
     if (spouse) drawNode(spouse, nG);
     children.forEach(drawUnit);
   }
 
   function drawNode(m, parent) {
-    const x = m.tx, y = m.ty;
-    const cx = x + NW/2, cy = y + NH/2;
+    const x = m.tx, y = m.ty, cx = x+NW/2, cy = y+NH/2;
     const isMarriedIn = !m.parentId;
     const fill = isMarriedIn ? MARRIED_IN : (GEN_COLORS[m.generation] || '#888');
-    const stroke = isMarriedIn ? 'rgba(255,255,255,0.15)' : 'none';
-    const nameColor = (!isMarriedIn && m.generation===1) ? '#1a1a24' :
-                      isMarriedIn ? 'rgba(255,255,255,0.55)' : '#ffffff';
-    const subColor  = (!isMarriedIn && m.generation===1) ? 'rgba(0,0,0,0.5)' :
-                      isMarriedIn ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.6)';
-
+    const nameColor = (!isMarriedIn && m.generation===1) ? '#1a1a24' : isMarriedIn ? 'rgba(255,255,255,0.55)' : '#ffffff';
+    const subColor  = (!isMarriedIn && m.generation===1) ? 'rgba(0,0,0,0.5)'  : isMarriedIn ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.6)';
     const g = svgEl('g', { style:'cursor:pointer' });
-    g.appendChild(svgEl('rect', { x, y, width:NW, height:NH, rx:10, fill, stroke, 'stroke-width':1 }));
-    g.appendChild(svgEl('text', {
-      x:cx, y:cy-8, 'text-anchor':'middle', 'dominant-baseline':'central',
-      fill:nameColor, 'font-size':12, 'font-weight':500,
-      style:"font-family:'DM Sans',sans-serif"
-    }, firstName(m.name)));
+    g.appendChild(svgEl('rect', { x, y, width:NW, height:NH, rx:10, fill, stroke: isMarriedIn ? 'rgba(255,255,255,0.15)' : 'none', 'stroke-width':1 }));
+    g.appendChild(svgEl('text', { x:cx, y:cy-8, 'text-anchor':'middle', 'dominant-baseline':'central', fill:nameColor, 'font-size':12, 'font-weight':500, style:"font-family:'DM Sans',sans-serif" }, firstName(m.name)));
     const prof = m.profession.length > 16 ? m.profession.substring(0,15)+'…' : m.profession;
-    g.appendChild(svgEl('text', {
-      x:cx, y:cy+9, 'text-anchor':'middle', 'dominant-baseline':'central',
-      fill:subColor, 'font-size':9,
-      style:"font-family:'DM Sans',sans-serif"
-    }, prof));
-    if (m.died) {
-      g.appendChild(svgEl('text', { x:x+NW-8, y:y+11, 'text-anchor':'middle',
-        'dominant-baseline':'central', fill:'rgba(255,255,255,0.3)', 'font-size':9,
-        style:'font-family:sans-serif' }, '†'));
-    }
+    g.appendChild(svgEl('text', { x:cx, y:cy+9, 'text-anchor':'middle', 'dominant-baseline':'central', fill:subColor, 'font-size':9, style:"font-family:'DM Sans',sans-serif" }, prof));
+    if (m.died) g.appendChild(svgEl('text', { x:x+NW-8, y:y+11, 'text-anchor':'middle', 'dominant-baseline':'central', fill:'rgba(255,255,255,0.3)', 'font-size':9, style:'font-family:sans-serif' }, '†'));
 
     const tip = document.getElementById('tooltip');
     g.addEventListener('mousemove', e => {
-      tip.innerHTML = `<div class="tooltip-name">${m.name}${m.nickname ? ` <em style="font-size:11px;color:#bbb">"${m.nickname}"</em>` : ''}</div>
-        <div class="tooltip-detail">${m.profession}<br>${m.location}, ${m.country}<br>b. ${m.born}${m.died ? ` – ${m.died}` : ''}</div>`;
+      tip.innerHTML = `<div class="tooltip-name">${m.name}${m.nickname?` <em style="font-size:11px;color:#bbb">"${m.nickname}"</em>`:''}</div>
+        <div class="tooltip-detail">${m.profession}<br>${m.location}, ${m.country}<br>b. ${m.born}${m.died?` – ${m.died}`:''}</div>`;
       tip.classList.add('show');
-      tip.style.left = (e.clientX+14)+'px'; tip.style.top = (e.clientY-52)+'px';
+      tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-52)+'px';
     });
     g.addEventListener('mouseleave', () => tip.classList.remove('show'));
     g.addEventListener('click', () => openModal(m));
     parent.appendChild(g);
   }
-
   units.forEach(drawUnit);
 }
 
-// ── Modal ──
 function openModal(m) {
   const parent = m.parentId ? byId(m.parentId) : null;
   const spouse = m.spouseId ? byId(m.spouseId) : null;
-  const relation = parent
-    ? `${m.generation===2?'Child':'Grandchild'} of ${firstName(parent.name)}`
+  const relation = parent ? `${m.generation===2?'Child':'Grandchild'} of ${firstName(parent.name)}`
     : spouse ? `Married to ${firstName(spouse.name)}` : 'Founding generation';
-
   document.getElementById('modal-avatar').textContent = initials(m.name);
   document.getElementById('modal-name').textContent = m.name;
   document.getElementById('modal-nick').textContent = m.nickname ? `"${m.nickname}"` : '';
@@ -413,29 +242,21 @@ function openModal(m) {
   document.getElementById('modal-location').textContent = `${m.location}, ${m.country}`;
   document.getElementById('modal-profession').textContent = `${m.profession} · ${m.field}`;
   document.getElementById('modal-born').textContent = m.born + (m.died ? ` – ${m.died}` : '');
-
   let html = `<div class="modal-contact-title">Contact</div>`;
   if (m.contact?.email || m.contact?.phone) {
     if (m.contact.email) html += `<a class="contact-btn" href="mailto:${m.contact.email}">✉ Email</a>`;
     if (m.contact.phone) html += `<a class="contact-btn" href="tel:${m.contact.phone}">📞 Call</a>`;
     if (m.contact.whatsapp) html += `<a class="contact-btn" href="https://wa.me/${m.contact.whatsapp.replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>`;
-  } else {
-    html += `<p class="locked-msg">Contact info not yet added.</p>`;
-  }
-  if (spouse) html += `<div class="modal-divider"></div>
-    <div class="modal-row"><span class="modal-row-label">Spouse</span><span class="modal-row-value">${spouse.name}</span></div>`;
+  } else { html += `<p class="locked-msg">Contact info not yet added.</p>`; }
+  if (spouse) html += `<div class="modal-divider"></div><div class="modal-row"><span class="modal-row-label">Spouse</span><span class="modal-row-value">${spouse.name}</span></div>`;
   document.getElementById('modal-contact').innerHTML = html;
   document.getElementById('modal-overlay').classList.add('open');
 }
 
-document.getElementById('modal-close').addEventListener('click', () =>
-  document.getElementById('modal-overlay').classList.remove('open'));
-document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal-overlay'))
-    document.getElementById('modal-overlay').classList.remove('open');
-});
+document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('open'));
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); });
 
-// ── Boot — no fetch needed, data is embedded above ──
+// Boot — FAMILY_MEMBERS is already loaded from family.js above
 const units = buildUnits();
 const totalW = layoutAll(units);
 render(units, totalW);
