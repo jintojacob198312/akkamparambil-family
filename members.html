@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Members · Akkamparambil Family</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-header {
+      background: var(--dark); padding: 7rem 2rem 4rem;
+      text-align: center;
+    }
+    .page-header .section-tag { color: var(--gold); }
+    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: var(--white); font-weight: 400; }
+    .page-header p { color: rgba(255,255,255,0.45); margin-top: 0.75rem; font-size: 16px; }
+
+    .members-section { padding: 3rem 2rem 5rem; }
+    .gen-label {
+      font-family: var(--font-display); font-size: 28px; font-weight: 400;
+      margin: 3rem 0 1.25rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-light); color: var(--ink);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .gen-label span {
+      font-size: 12px; background: var(--dark); color: var(--gold);
+      padding: 3px 10px; border-radius: 20px; font-family: var(--font-body);
+      letter-spacing: 0.05em;
+    }
+    .no-results { text-align: center; padding: 4rem 2rem; color: var(--muted); font-style: italic; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-crest">A</div>
+    <span class="nav-name">Akkamparambil</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="members.html" class="active">Members</a></li>
+    <li><a href="tree.html">Family Tree</a></li>
+    <li><a href="map.html">World Map</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <span class="section-tag">The family</span>
+  <h1>All Members</h1>
+  <p>Every branch of the Akkamparambil family, in one place.</p>
+</div>
+
+<section class="members-section">
+  <div class="section-inner">
+    <div class="members-controls">
+      <input class="search-input" type="text" id="search" placeholder="Search by name, location…" />
+      <button class="filter-btn active" data-field="all">All</button>
+      <button class="filter-btn" data-field="Technology">Technology</button>
+      <button class="filter-btn" data-field="Medicine">Medicine</button>
+      <button class="filter-btn" data-field="Healthcare">Healthcare</button>
+      <button class="filter-btn" data-field="Finance">Finance</button>
+      <button class="filter-btn" data-field="Education">Education</button>
+      <button class="filter-btn" data-field="Engineering">Engineering</button>
+    </div>
+
+    <div id="members-container">
+      <!-- populated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <div class="modal-avatar" id="modal-avatar"></div>
+    <div class="modal-name" id="modal-name"></div>
+    <div class="modal-nick" id="modal-nick"></div>
+    <div class="modal-relation" id="modal-relation"></div>
+    <p class="modal-bio" id="modal-bio"></p>
+    <div class="modal-divider"></div>
+    <div class="modal-row">
+      <span class="modal-row-label">Location</span>
+      <span class="modal-row-value" id="modal-location"></span>
+    </div>
+    <div class="modal-row">
+      <span class="modal-row-label">Profession</span>
+      <span class="modal-row-value" id="modal-profession"></span>
+    </div>
+    <div class="modal-row" id="modal-born-row">
+      <span class="modal-row-label">Born</span>
+      <span class="modal-row-value" id="modal-born"></span>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-contact" id="modal-contact"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">Akkamparambil</div>
+  <p>A family portal built with love · <a href="mailto:">Contact the admin</a></p>
+  <p style="margin-top:1rem; font-size:11px; opacity:0.5;">© 2025 Akkamparambil Family · akkamparambil.com</p>
+</footer>
+
+<script>
+let allMembers = [];
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+}
+
+function getRelation(member, members) {
+  if (!member.parentId) return member.spouseId ? 'Founding generation' : 'Family member';
+  const parent = members.find(m => m.id === member.parentId);
+  return parent ? `${parent.generation === 1 ? 'Child' : 'Grandchild'} of ${parent.name.split(' ')[0]}` : '';
+}
+
+function renderMembers(members, filter = 'all', query = '') {
+  const container = document.getElementById('members-container');
+  container.innerHTML = '';
+
+  let filtered = members.filter(m => {
+    const matchField = filter === 'all' || m.field === filter;
+    const matchQuery = !query || m.name.toLowerCase().includes(query) || m.location.toLowerCase().includes(query) || m.profession.toLowerCase().includes(query);
+    return matchField && matchQuery;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="no-results">No members found matching your search.</div>';
+    return;
+  }
+
+  const byGen = {};
+  filtered.forEach(m => {
+    if (!byGen[m.generation]) byGen[m.generation] = [];
+    byGen[m.generation].push(m);
+  });
+
+  const genLabels = { 1: 'First Generation', 2: 'Second Generation', 3: 'Third Generation' };
+
+  Object.keys(byGen).sort().forEach(gen => {
+    const label = document.createElement('div');
+    label.className = 'gen-label';
+    label.innerHTML = `${genLabels[gen] || 'Generation ' + gen} <span>${byGen[gen].length} member${byGen[gen].length > 1 ? 's' : ''}</span>`;
+    container.appendChild(label);
+
+    const grid = document.createElement('div');
+    grid.className = 'members-grid';
+
+    byGen[gen].forEach(m => {
+      const relation = getRelation(m, members);
+      const initials = getInitials(m.name);
+      const card = document.createElement('div');
+      card.className = 'member-card';
+      card.dataset.id = m.id;
+      card.innerHTML = `
+        <div class="member-gen">Gen ${m.generation}</div>
+        <div class="member-avatar">${m.photo ? `<img src="${m.photo}" alt="${m.name}">` : initials}</div>
+        <div class="member-name">${m.name}</div>
+        ${m.nickname ? `<div class="member-nick">"${m.nickname}"</div>` : ''}
+        <div class="member-relation">${relation}</div>
+        <div class="member-profession">${m.profession}</div>
+        <div class="member-location">${m.location}, ${m.country}</div>
+      `;
+      card.addEventListener('click', () => openModal(m, members));
+      grid.appendChild(card);
+    });
+
+    container.appendChild(grid);
+  });
+}
+
+function openModal(m, members) {
+  const initials = getInitials(m.name);
+  const relation = getRelation(m, members);
+
+  document.getElementById('modal-avatar').innerHTML = m.photo ? `<img src="${m.photo}" alt="${m.name}">` : initials;
+  document.getElementById('modal-name').textContent = m.name;
+  document.getElementById('modal-nick').textContent = m.nickname ? `"${m.nickname}"` : '';
+  document.getElementById('modal-relation').textContent = relation;
+  document.getElementById('modal-bio').textContent = m.bio || '';
+  document.getElementById('modal-location').textContent = `${m.location}, ${m.country}`;
+  document.getElementById('modal-profession').textContent = `${m.profession} · ${m.field}`;
+  document.getElementById('modal-born').textContent = m.born + (m.died ? ` – ${m.died}` : '');
+
+  // Contact
+  const contactDiv = document.getElementById('modal-contact');
+  let contactHtml = `<div class="modal-contact-title">Contact</div>`;
+  if (m.contact && (m.contact.email || m.contact.phone || m.contact.whatsapp)) {
+    if (m.contact.email) contactHtml += `<a class="contact-btn" href="mailto:${m.contact.email}">✉ Email</a>`;
+    if (m.contact.phone) contactHtml += `<a class="contact-btn" href="tel:${m.contact.phone}">📞 Call</a>`;
+    if (m.contact.whatsapp) contactHtml += `<a class="contact-btn" href="https://wa.me/${m.contact.whatsapp.replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>`;
+  } else {
+    contactHtml += `<p class="locked-msg">Contact info not yet added. Ask the family admin to update.</p>`;
+  }
+  contactDiv.innerHTML = contactHtml;
+
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+fetch('family.json')
+  .then(r => r.json())
+  .then(data => {
+    allMembers = data.members;
+    let currentFilter = 'all';
+    let currentQuery = '';
+
+    renderMembers(allMembers, currentFilter, currentQuery);
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.field;
+        renderMembers(allMembers, currentFilter, currentQuery);
+      });
+    });
+
+    document.getElementById('search').addEventListener('input', e => {
+      currentQuery = e.target.value.toLowerCase();
+      renderMembers(allMembers, currentFilter, currentQuery);
+    });
+  });
+</script>
+</body>
+</html>

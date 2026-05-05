@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Family Tree · Akkamparambil</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { background: var(--dark); }
+    .page-header { background: var(--dark); padding: 7rem 2rem 2rem; text-align: center; }
+    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: var(--white); font-weight: 400; }
+    .page-header p { color: rgba(255,255,255,0.4); margin-top: 0.75rem; font-size: 16px; }
+
+    #tree-canvas { width: 100%; overflow-x: auto; padding: 2rem 1rem 4rem; }
+
+    svg text { font-family: 'DM Sans', sans-serif; }
+
+    .tree-legend {
+      display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+      padding: 1rem 2rem 3rem; color: rgba(255,255,255,0.4); font-size: 12px;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    footer { background: var(--dark2); }
+
+    /* tooltip */
+    .tree-tooltip {
+      position: fixed; background: var(--white); border-radius: 10px;
+      padding: 12px 16px; font-size: 13px; color: var(--ink);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2); pointer-events: none;
+      opacity: 0; transition: opacity 0.15s; z-index: 300; max-width: 200px;
+    }
+    .tree-tooltip.show { opacity: 1; }
+    .tooltip-name { font-weight: 500; font-family: 'Cormorant Garamond', serif; font-size: 15px; }
+    .tooltip-detail { color: #888; margin-top: 2px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-crest">A</div>
+    <span class="nav-name">Akkamparambil</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="members.html">Members</a></li>
+    <li><a href="tree.html" class="active">Family Tree</a></li>
+    <li><a href="map.html">World Map</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <span class="section-tag" style="color:var(--gold)">Three generations</span>
+  <h1>Family Tree</h1>
+  <p>Hover over any member to see their details. Click to view full profile.</p>
+</div>
+
+<div id="tree-canvas">
+  <svg id="tree-svg" style="display:block;margin:auto;"></svg>
+</div>
+
+<div class="tree-legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div> Generation 1 (Founders)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5b8cdb"></div> Generation 2</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5bc4a0"></div> Generation 3</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2)"></div> Married in</div>
+</div>
+
+<div class="tree-tooltip" id="tooltip"></div>
+
+<!-- MODAL (reused) -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <div class="modal-avatar" id="modal-avatar"></div>
+    <div class="modal-name" id="modal-name"></div>
+    <div class="modal-nick" id="modal-nick"></div>
+    <div class="modal-relation" id="modal-relation"></div>
+    <p class="modal-bio" id="modal-bio"></p>
+    <div class="modal-divider"></div>
+    <div class="modal-row"><span class="modal-row-label">Location</span><span class="modal-row-value" id="modal-location"></span></div>
+    <div class="modal-row"><span class="modal-row-label">Profession</span><span class="modal-row-value" id="modal-profession"></span></div>
+    <div class="modal-row"><span class="modal-row-label">Born</span><span class="modal-row-value" id="modal-born"></span></div>
+    <div class="modal-divider"></div>
+    <div class="modal-contact" id="modal-contact"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-brand">Akkamparambil</div>
+  <p>© 2025 Akkamparambil Family · akkamparambil.com</p>
+</footer>
+
+<script>
+const NODE_W = 130, NODE_H = 60, H_GAP = 30, V_GAP = 100;
+const GEN_COLORS = { 1: '#C9A84C', 2: '#5b8cdb', 3: '#5bc4a0' };
+const MARRIED_IN = '#2a2a38';
+
+let allMembers = [];
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').substring(0, 2);
+}
+
+function buildTree(members) {
+  const svg = document.getElementById('tree-svg');
+  svg.innerHTML = '';
+
+  // Layout: group by generation
+  const byGen = {};
+  members.forEach(m => {
+    if (!byGen[m.generation]) byGen[m.generation] = [];
+    byGen[m.generation].push(m);
+  });
+
+  const gens = Object.keys(byGen).map(Number).sort();
+  const totalH = gens.length * (NODE_H + V_GAP) + V_GAP + 60;
+  const maxPerRow = Math.max(...gens.map(g => byGen[g].length));
+  const totalW = Math.max(600, maxPerRow * (NODE_W + H_GAP) + H_GAP);
+
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+  const positions = {};
+
+  gens.forEach((gen, gi) => {
+    const row = byGen[gen];
+    const y = gi * (NODE_H + V_GAP) + V_GAP;
+    const rowW = row.length * (NODE_W + H_GAP) - H_GAP;
+    const startX = (totalW - rowW) / 2;
+
+    row.forEach((m, i) => {
+      const x = startX + i * (NODE_W + H_GAP);
+      const cx = x + NODE_W / 2;
+      const cy = y + NODE_H / 2;
+      positions[m.id] = { x, y, cx, cy };
+    });
+  });
+
+  // Draw connector lines first (behind nodes)
+  const linesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  svg.appendChild(linesGroup);
+
+  members.forEach(m => {
+    if (!m.parentId) return;
+    const parent = members.find(p => p.id === m.parentId);
+    if (!parent || !positions[parent.id] || !positions[m.id]) return;
+
+    const p = positions[parent.id];
+    const c = positions[m.id];
+    const midY = p.cy + NODE_H / 2 + V_GAP / 2;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    line.setAttribute('d', `M ${p.cx} ${p.cy + NODE_H/2} L ${p.cx} ${midY} L ${c.cx} ${midY} L ${c.cx} ${c.cy - NODE_H/2}`);
+    line.setAttribute('fill', 'none');
+    line.setAttribute('stroke', 'rgba(255,255,255,0.12)');
+    line.setAttribute('stroke-width', '1.5');
+    linesGroup.appendChild(line);
+  });
+
+  // Draw nodes
+  const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  svg.appendChild(nodesGroup);
+
+  members.forEach(m => {
+    if (!positions[m.id]) return;
+    const { x, y, cx, cy } = positions[m.id];
+    const isMarriedIn = !m.parentId && m.spouseId;
+    const color = isMarriedIn ? MARRIED_IN : (GEN_COLORS[m.generation] || '#888');
+    const textColor = isMarriedIn ? 'rgba(255,255,255,0.5)' : (m.generation === 1 ? '#1a1a24' : '#ffffff');
+    const firstName = m.name.split(' ')[0];
+    const initials = getInitials(m.name);
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.style.cursor = 'pointer';
+
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', y);
+    rect.setAttribute('width', NODE_W); rect.setAttribute('height', NODE_H);
+    rect.setAttribute('rx', '10');
+    rect.setAttribute('fill', color);
+    rect.setAttribute('stroke', isMarriedIn ? 'rgba(255,255,255,0.1)' : 'none');
+    rect.setAttribute('stroke-width', '1');
+
+    const nameText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    nameText.setAttribute('x', cx); nameText.setAttribute('y', cy - 6);
+    nameText.setAttribute('text-anchor', 'middle'); nameText.setAttribute('dominant-baseline', 'central');
+    nameText.setAttribute('fill', textColor); nameText.setAttribute('font-size', '13');
+    nameText.setAttribute('font-weight', '500');
+    nameText.textContent = firstName;
+
+    const subText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    subText.setAttribute('x', cx); subText.setAttribute('y', cy + 12);
+    subText.setAttribute('text-anchor', 'middle'); subText.setAttribute('dominant-baseline', 'central');
+    subText.setAttribute('fill', isMarriedIn ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.35)');
+    subText.setAttribute('font-size', '10');
+    if (m.generation === 1) subText.setAttribute('fill', 'rgba(0,0,0,0.5)');
+    else if (!isMarriedIn) subText.setAttribute('fill', 'rgba(255,255,255,0.6)');
+    subText.textContent = m.profession;
+
+    g.appendChild(rect); g.appendChild(nameText); g.appendChild(subText);
+
+    // hover
+    const tooltip = document.getElementById('tooltip');
+    g.addEventListener('mousemove', e => {
+      tooltip.innerHTML = `<div class="tooltip-name">${m.name}</div><div class="tooltip-detail">${m.profession} · ${m.location}</div>`;
+      tooltip.classList.add('show');
+      tooltip.style.left = (e.clientX + 12) + 'px';
+      tooltip.style.top = (e.clientY - 40) + 'px';
+    });
+    g.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+    g.addEventListener('click', () => openModal(m, allMembers));
+
+    nodesGroup.appendChild(g);
+  });
+}
+
+function openModal(m, members) {
+  const initials = getInitials(m.name);
+  const parent = m.parentId ? members.find(p => p.id === m.parentId) : null;
+  const relation = parent ? `${m.generation === 2 ? 'Child' : 'Grandchild'} of ${parent.name.split(' ')[0]}` : 'Founding generation';
+
+  document.getElementById('modal-avatar').innerHTML = m.photo ? `<img src="${m.photo}" alt="${m.name}">` : initials;
+  document.getElementById('modal-name').textContent = m.name;
+  document.getElementById('modal-nick').textContent = m.nickname ? `"${m.nickname}"` : '';
+  document.getElementById('modal-relation').textContent = relation;
+  document.getElementById('modal-bio').textContent = m.bio || '';
+  document.getElementById('modal-location').textContent = `${m.location}, ${m.country}`;
+  document.getElementById('modal-profession').textContent = `${m.profession} · ${m.field}`;
+  document.getElementById('modal-born').textContent = m.born + (m.died ? ` – ${m.died}` : '');
+
+  const contactDiv = document.getElementById('modal-contact');
+  let contactHtml = `<div class="modal-contact-title">Contact</div>`;
+  if (m.contact && (m.contact.email || m.contact.phone)) {
+    if (m.contact.email) contactHtml += `<a class="contact-btn" href="mailto:${m.contact.email}">✉ Email</a>`;
+    if (m.contact.phone) contactHtml += `<a class="contact-btn" href="tel:${m.contact.phone}">📞 Call</a>`;
+    if (m.contact.whatsapp) contactHtml += `<a class="contact-btn" href="https://wa.me/${m.contact.whatsapp.replace(/[^0-9]/g,'')}" target="_blank">💬 WhatsApp</a>`;
+  } else {
+    contactHtml += `<p class="locked-msg">Contact info not yet added.</p>`;
+  }
+  contactDiv.innerHTML = contactHtml;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('open'));
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); });
+
+fetch('family.json')
+  .then(r => r.json())
+  .then(data => {
+    allMembers = data.members;
+    buildTree(allMembers);
+  });
+</script>
+</body>
+</html>

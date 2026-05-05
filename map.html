@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Map · Akkamparambil</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    .page-header { background: var(--dark); padding: 7rem 2rem 2rem; text-align: center; }
+    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: var(--white); font-weight: 400; }
+    .page-header p { color: rgba(255,255,255,0.4); margin-top: 0.75rem; font-size: 16px; }
+    #map { height: 520px; width: 100%; }
+    .map-wrap { max-width: 1100px; margin: 3rem auto 0; padding: 0 2rem; }
+    .leaflet-popup-content-wrapper {
+      border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+    }
+    .popup-name { font-family: 'Cormorant Garamond',serif; font-size: 17px; font-weight: 500; margin-bottom: 2px; }
+    .popup-detail { font-size: 12px; color: #888; line-height: 1.6; }
+    .country-list { max-width: 1100px; margin: 3rem auto 5rem; padding: 0 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .country-card {
+      background: var(--white); border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .country-flag { font-size: 24px; }
+    .country-name { font-weight: 500; font-size: 14px; }
+    .country-count { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-crest">A</div>
+    <span class="nav-name">Akkamparambil</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="members.html">Members</a></li>
+    <li><a href="tree.html">Family Tree</a></li>
+    <li><a href="map.html" class="active">World Map</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+  </ul>
+</nav>
+
+<div class="page-header">
+  <span class="section-tag" style="color:var(--gold)">Across the globe</span>
+  <h1>Where We Live</h1>
+  <p>From Kerala to five continents — our family has spread far and wide.</p>
+</div>
+
+<div class="map-wrap">
+  <div id="map" style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border-light);"></div>
+</div>
+
+<div class="country-list" id="country-list"></div>
+
+<footer>
+  <div class="footer-brand">Akkamparambil</div>
+  <p>© 2025 Akkamparambil Family · akkamparambil.com</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// Country coordinates lookup
+const countryCoords = {
+  'India': [20.5937, 78.9629],
+  'UAE': [23.4241, 53.8478],
+  'UK': [51.5074, -0.1278],
+  'USA': [37.0902, -95.7129],
+  'Canada': [56.1304, -106.3468],
+  'Australia': [-25.2744, 133.7751],
+  'Germany': [51.1657, 10.4515],
+  'Singapore': [1.3521, 103.8198],
+  'Qatar': [25.2854, 51.5310],
+  'Kuwait': [29.3759, 47.9774],
+  'Bahrain': [26.0667, 50.5577],
+  'Oman': [21.4735, 55.9754]
+};
+
+const cityCoords = {
+  'Thrissur, Kerala': [10.5276, 76.2144],
+  'Ernakulam, Kerala': [9.9816, 76.2999],
+  'Bangalore, Karnataka': [12.9716, 77.5946],
+  'Mumbai, Maharashtra': [19.0760, 72.8777],
+  'Dubai': [25.2048, 55.2708],
+  'London': [51.5074, -0.1278],
+  'Toronto': [43.6532, -79.3832],
+  'New Jersey, USA': [40.0583, -74.4057],
+  'Sydney': [-33.8688, 151.2093],
+};
+
+const countryFlags = {
+  'India': '🇮🇳', 'UAE': '🇦🇪', 'UK': '🇬🇧', 'USA': '🇺🇸',
+  'Canada': '🇨🇦', 'Australia': '🇦🇺', 'Germany': '🇩🇪',
+  'Singapore': '🇸🇬', 'Qatar': '🇶🇦', 'Kuwait': '🇰🇼'
+};
+
+const map = L.map('map', {
+  center: [20, 40], zoom: 2.5,
+  zoomControl: true,
+  scrollWheelZoom: false
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© OpenStreetMap, © CartoDB',
+  subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+const goldIcon = L.divIcon({
+  className: '',
+  html: `<div style="width:14px;height:14px;border-radius:50%;background:#C9A84C;border:2px solid #fff;box-shadow:0 2px 8px rgba(201,168,76,0.5);"></div>`,
+  iconSize: [14, 14], iconAnchor: [7, 7]
+});
+
+fetch('family.json')
+  .then(r => r.json())
+  .then(data => {
+    const members = data.members;
+    const byCityKey = {};
+
+    members.forEach(m => {
+      const key = `${m.location}, ${m.country}`;
+      if (!byCityKey[key]) byCityKey[key] = [];
+      byCityKey[key].push(m);
+    });
+
+    Object.entries(byCityKey).forEach(([key, mems]) => {
+      let coords = cityCoords[key] || cityCoords[mems[0].location];
+      if (!coords) coords = countryCoords[mems[0].country];
+      if (!coords) return;
+
+      const names = mems.map(m => `<div>• ${m.name} <span style="color:#aaa">(${m.profession})</span></div>`).join('');
+      const popup = `<div class="popup-name">${mems[0].location}</div><div class="popup-detail">${names}</div>`;
+      L.marker(coords, { icon: goldIcon }).addTo(map).bindPopup(popup);
+    });
+
+    // Country list
+    const byCountry = {};
+    members.forEach(m => {
+      if (!byCountry[m.country]) byCountry[m.country] = 0;
+      byCountry[m.country]++;
+    });
+
+    const countryList = document.getElementById('country-list');
+    Object.entries(byCountry).sort((a,b) => b[1]-a[1]).forEach(([country, count]) => {
+      const card = document.createElement('div');
+      card.className = 'country-card';
+      card.innerHTML = `<div class="country-flag">${countryFlags[country] || '🌍'}</div><div><div class="country-name">${country}</div><div class="country-count">${count} member${count > 1 ? 's' : ''}</div></div>`;
+      countryList.appendChild(card);
+    });
+  });
+</script>
+</body>
+</html>

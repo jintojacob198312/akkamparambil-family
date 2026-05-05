@@ -1,8 +1,194 @@
 <!DOCTYPE html>
-<html>
-<head><title>Akkamparambil Family</title></head>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Akkamparambil Family Portal</title>
+  <meta name="description" content="The official family portal for the Akkamparambil family — connecting generations across the world." />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* page-specific extras */
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px; margin-top: 3rem;
+    }
+    .feature-card {
+      background: var(--white); border-radius: var(--radius);
+      border: 1px solid var(--border-light); padding: 2rem;
+      transition: box-shadow 0.25s, transform 0.25s;
+      text-decoration: none; color: inherit;
+    }
+    .feature-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: var(--dark); display: flex; align-items: center;
+      justify-content: center; font-size: 22px; margin-bottom: 1.25rem;
+    }
+    .feature-card h3 { font-family: var(--font-display); font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    .feature-arrow { margin-top: 1rem; font-size: 13px; color: var(--gold); }
+
+    .recent-section { background: var(--dark2); }
+    .recent-section .section-title { color: var(--white); }
+    .recent-section .section-tag { color: var(--gold); }
+    .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 2rem; }
+    .recent-card {
+      background: var(--dark3); border-radius: var(--radius-sm);
+      border: 1px solid rgba(255,255,255,0.06); padding: 18px;
+      display: flex; align-items: center; gap: 14px; cursor: pointer;
+      transition: border-color 0.2s; text-decoration: none; color: inherit;
+    }
+    .recent-card:hover { border-color: var(--border); }
+    .recent-av {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      background: var(--dark); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-size: 16px; color: var(--gold);
+    }
+    .recent-name { font-size: 14px; color: var(--white); font-weight: 400; }
+    .recent-loc { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+    .view-all {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 2rem; color: var(--gold); font-size: 14px;
+      text-decoration: none; border-bottom: 1px solid rgba(201,168,76,0.3);
+      padding-bottom: 2px; transition: border-color 0.2s;
+    }
+    .view-all:hover { border-color: var(--gold); }
+  </style>
+</head>
 <body>
-  <h1>Welcome to the Akkamparambil Family Portal</h1>
-  <p>Coming soon...</p>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="index.html">
+    <div class="nav-crest">A</div>
+    <span class="nav-name">Akkamparambil</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="members.html">Members</a></li>
+    <li><a href="tree.html">Family Tree</a></li>
+    <li><a href="map.html">World Map</a></li>
+    <li><a href="gallery.html">Gallery</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-pattern"></div>
+  <div class="hero-ornament">Est. Kerala, India</div>
+  <h1><em>Akkamparambil</em><br>Family Portal</h1>
+  <p class="hero-sub">Connected by roots. Spread across the world.</p>
+  <p class="hero-desc">One family, many branches. This is a living record of who we are, where we come from, and how every one of us is connected.</p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="stat-members">—</span>
+      <span class="hero-stat-label">Members</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="stat-gen">3</span>
+      <span class="hero-stat-label">Generations</span>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="hero-stat">
+      <span class="hero-stat-num" id="stat-countries">—</span>
+      <span class="hero-stat-label">Countries</span>
+    </div>
+  </div>
+  <div>
+    <a href="members.html" class="hero-cta">Explore Members</a>
+    <a href="tree.html" class="hero-cta outline">View Family Tree</a>
+  </div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    scroll
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section style="background: var(--light);">
+  <div class="section-inner">
+    <span class="section-tag">What's inside</span>
+    <h2 class="section-title">Everything in<br>one place</h2>
+    <p class="section-subtitle">Find any relative, see how you're connected, reach out — all from here.</p>
+    <div class="feature-grid">
+      <a class="feature-card" href="members.html">
+        <div class="feature-icon">👥</div>
+        <h3>Member Directory</h3>
+        <p>Browse all family members, filter by profession or location, and view each person's profile.</p>
+        <div class="feature-arrow">Browse members →</div>
+      </a>
+      <a class="feature-card" href="tree.html">
+        <div class="feature-icon">🌳</div>
+        <h3>Family Tree</h3>
+        <p>An interactive tree showing how every member is connected across three generations.</p>
+        <div class="feature-arrow">View tree →</div>
+      </a>
+      <a class="feature-card" href="map.html">
+        <div class="feature-icon">🌍</div>
+        <h3>World Map</h3>
+        <p>See where our family has spread — from Kerala to Canada, Dubai to London.</p>
+        <div class="feature-arrow">Explore map →</div>
+      </a>
+      <a class="feature-card" href="gallery.html">
+        <div class="feature-icon">📸</div>
+        <h3>Photo Gallery</h3>
+        <p>Family reunions, weddings, milestones — a shared album of our most precious moments.</p>
+        <div class="feature-arrow">View gallery →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- RECENT MEMBERS -->
+<section class="recent-section">
+  <div class="section-inner">
+    <span class="section-tag">Family members</span>
+    <h2 class="section-title" style="color:var(--white)">Our family</h2>
+    <div class="recent-grid" id="recent-grid">
+      <!-- populated by JS -->
+    </div>
+    <a href="members.html" class="view-all">View all members →</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">Akkamparambil</div>
+  <p>A family portal built with love · <a href="mailto:">Contact the admin</a></p>
+  <p style="margin-top:1rem; font-size:11px; opacity:0.5;">© 2025 Akkamparambil Family · akkamparambil.com</p>
+</footer>
+
+<script>
+fetch('family.json')
+  .then(r => r.json())
+  .then(data => {
+    const members = data.members;
+    document.getElementById('stat-members').textContent = members.length;
+    const countries = [...new Set(members.map(m => m.country).filter(Boolean))];
+    document.getElementById('stat-countries').textContent = countries.length;
+
+    // recent grid (show first 8)
+    const grid = document.getElementById('recent-grid');
+    members.slice(0, 8).forEach(m => {
+      const initials = m.name.split(' ').map(w => w[0]).join('').substring(0,2);
+      const card = document.createElement('a');
+      card.href = 'members.html';
+      card.className = 'recent-card';
+      card.innerHTML = `
+        <div class="recent-av">${m.photo ? `<img src="${m.photo}" alt="${m.name}">` : initials}</div>
+        <div>
+          <div class="recent-name">${m.name}</div>
+          <div class="recent-loc">${m.location}</div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  })
+  .catch(() => {
+    document.getElementById('stat-members').textContent = '24';
+    document.getElementById('stat-countries').textContent = '6';
+  });
+</script>
 </body>
 </html>
