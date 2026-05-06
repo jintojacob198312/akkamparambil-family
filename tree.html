@@ -106,18 +106,31 @@
 </footer>
 
 <script>
-// ── All data comes from family.js (loaded above via <script src>) ──
-// FAMILY_MEMBERS is available globally — no fetch needed.
 
-const NW = 114, NH = 54;
-const COUPLE_GAP = 22, SIBLING_GAP = 38, GEN_V = 145, COUPLE_DROP = 12;
-// Bright Kerala palette: saffron / deep teal / forest green
+// ── All data comes from family.js (loaded above via <script src>) ──
+const NW = 134, NH = 90;    // larger nodes to fit photo + text
+const PHOTO_R = 27;         // circular photo radius
+const COUPLE_GAP = 26, SIBLING_GAP = 48, GEN_V = 170, COUPLE_DROP = 14;
 const GEN_COLORS = { 1:'#E8821A', 2:'#0D6E6E', 3:'#2E9E5A' };
 const MARRIED_IN = '#1A3A3A';
 
 const byId = id => FAMILY_MEMBERS.find(m => m.id === id);
 const initials = n => n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
 const firstName = n => n.split(' ')[0];
+
+// Preload all member photos
+const photoCache = {};
+function preloadPhotos(members) {
+  return Promise.all(members.filter(m => m.photo).map(m =>
+    new Promise(res => {
+      if (photoCache[m.photo]) return res();
+      const img = new Image();
+      img.onload = img.onerror = () => res();
+      img.src = m.photo;
+      photoCache[m.photo] = img;
+    })
+  ));
+}
 
 function svgEl(tag, attrs, text) {
   const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -136,8 +149,7 @@ function buildUnits() {
       const sp = byId(m.spouseId);
       if (sp && !seen.has(sp.id)) { seen.add(sp.id); unit.spouse = sp; }
     }
-    FAMILY_MEMBERS
-      .filter(c => c.parentId === m.id)
+    FAMILY_MEMBERS.filter(c => c.parentId === m.id)
       .forEach(c => { const u = make(c); if (u) unit.children.push(u); });
     return unit;
   }
@@ -161,8 +173,8 @@ function place(unit, x, y) {
   const cx = x + total / 2;
   if (unit.spouse) {
     const lx = cx - NW - COUPLE_GAP / 2;
-    unit.blood.tx = lx;                    unit.blood.ty = y;
-    unit.spouse.tx = lx + NW + COUPLE_GAP; unit.spouse.ty = y;
+    unit.blood.tx = lx;                     unit.blood.ty = y;
+    unit.spouse.tx = lx + NW + COUPLE_GAP;  unit.spouse.ty = y;
   } else {
     unit.blood.tx = cx - NW / 2; unit.blood.ty = y;
   }
@@ -179,7 +191,7 @@ function place(unit, x, y) {
 
 function layoutAll(units) {
   let x = 50;
-  units.forEach(u => { place(u, x, 70); x += unitW(u) + SIBLING_GAP; });
+  units.forEach(u => { place(u, x, 80); x += unitW(u) + SIBLING_GAP; });
   return x - SIBLING_GAP + 50;
 }
 
@@ -190,8 +202,12 @@ function render(units, totalW) {
   function walkY(u) { maxY = Math.max(maxY, u.blood.ty + NH + 20); u.children.forEach(walkY); }
   units.forEach(walkY);
   svg.setAttribute('width', totalW);
-  svg.setAttribute('height', maxY + 50);
-  svg.setAttribute('viewBox', `0 0 ${totalW} ${maxY + 50}`);
+  svg.setAttribute('height', maxY + 60);
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${maxY + 60}`);
+
+  // defs for clip paths (circular photos)
+  const defs = svgEl('defs', {});
+  svg.appendChild(defs);
 
   const lG = svgEl('g', {}); svg.appendChild(lG);
   const nG = svgEl('g', {}); svg.appendChild(nG);
@@ -202,7 +218,7 @@ function render(units, totalW) {
     if (spouse) {
       const x1 = blood.tx + NW, x2 = spouse.tx;
       lG.appendChild(svgEl('line', { x1, y1:midY, x2, y2:midY, stroke:'#E8821A', 'stroke-width':2.5, 'stroke-linecap':'round' }));
-      lG.appendChild(svgEl('text', { x:(x1+x2)/2, y:midY+1, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':10, fill:'#E8821A', style:'font-family:sans-serif' }, '♥'));
+      lG.appendChild(svgEl('text', { x:(x1+x2)/2, y:midY+1, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':11, fill:'#E8821A', style:'font-family:sans-serif' }, '♥'));
       lG.appendChild(svgEl('line', { x1:jx, y1:midY, x2:jx, y2:jy, stroke:'#E8821A', 'stroke-width':1.5, 'stroke-dasharray':'4 3' }));
     } else {
       lG.appendChild(svgEl('line', { x1:jx, y1:blood.ty+NH, x2:jx, y2:jy, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
@@ -212,53 +228,85 @@ function render(units, totalW) {
       const xs = children.map(c => c.jx);
       lG.appendChild(svgEl('line', { x1:jx, y1:jy, x2:jx, y2:hBarY, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
       if (children.length > 1) lG.appendChild(svgEl('line', { x1:Math.min(...xs), y1:hBarY, x2:Math.max(...xs), y2:hBarY, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
-      children.forEach(child => lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-8, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 })));
+      children.forEach(child => lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-10, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 })));
     }
-    drawNode(blood, nG);
-    if (spouse) drawNode(spouse, nG);
+    drawNode(blood, nG, defs);
+    if (spouse) drawNode(spouse, nG, defs);
     children.forEach(drawUnit);
   }
 
-  function drawNode(m, parent) {
-    const x = m.tx, y = m.ty, cx = x+NW/2, cy = y+NH/2;
+  function drawNode(m, parent, defs) {
+    const x = m.tx, y = m.ty, cx = x + NW/2;
     const isMarriedIn = !m.parentId;
     const isDeceased = !!m.died;
-
-    // Deceased nodes: desaturated gray regardless of generation
     let fill = isMarriedIn ? MARRIED_IN : (GEN_COLORS[m.generation] || '#888');
-    if (isDeceased) fill = '#3a3a3a';
+    if (isDeceased) fill = '#4a4a4a';
 
-    const nameColor = isDeceased ? 'rgba(255,255,255,0.6)'
-      : '#ffffff';
-    const subColor = isDeceased ? 'rgba(255,255,255,0.35)'
-      : 'rgba(255,255,255,0.75)';
+    const g = svgEl('g', { style:'cursor:pointer', opacity: isDeceased ? '0.75' : '1' });
 
-    const g = svgEl('g', { style:'cursor:pointer', opacity: isDeceased ? '0.7' : '1' });
-
-    // Dashed border for deceased
-    g.appendChild(svgEl('rect', { x, y, width:NW, height:NH, rx:10, fill,
-      stroke: isDeceased ? 'rgba(255,255,255,0.25)' : isMarriedIn ? 'rgba(255,255,255,0.15)' : 'none',
-      'stroke-width': isDeceased ? 1 : 1,
-      'stroke-dasharray': isDeceased ? '4 3' : 'none'
+    // Card background
+    g.appendChild(svgEl('rect', { x, y, width:NW, height:NH, rx:12, fill,
+      stroke: isDeceased ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+      'stroke-width':1, 'stroke-dasharray': isDeceased ? '4 3' : 'none'
     }));
 
-    // Name — struck through feel via positioning, show † prefix
+    // ── Photo or initials circle ──
+    const photoX = cx;          // center of photo circle
+    const photoY = y + PHOTO_R + 10;  // top padding + radius
+    const clipId = `clip-${m.id}`;
+
+    if (m.photo && photoCache[m.photo] && photoCache[m.photo].complete && photoCache[m.photo].naturalWidth > 0) {
+      // Circular clip path
+      const clipPath = svgEl('clipPath', { id: clipId });
+      clipPath.appendChild(svgEl('circle', { cx: photoX, cy: photoY, r: PHOTO_R }));
+      defs.appendChild(clipPath);
+
+      // White border ring
+      g.appendChild(svgEl('circle', { cx: photoX, cy: photoY, r: PHOTO_R + 2.5,
+        fill:'rgba(255,255,255,0.25)' }));
+
+      // Photo image clipped to circle
+      const imgEl = svgEl('image', {
+        href: m.photo,
+        x: photoX - PHOTO_R, y: photoY - PHOTO_R,
+        width: PHOTO_R * 2, height: PHOTO_R * 2,
+        'clip-path': `url(#${clipId})`,
+        preserveAspectRatio: 'xMidYMid slice'
+      });
+      g.appendChild(imgEl);
+    } else {
+      // Initials circle fallback
+      g.appendChild(svgEl('circle', { cx: photoX, cy: photoY, r: PHOTO_R,
+        fill:'rgba(255,255,255,0.18)' }));
+      g.appendChild(svgEl('text', { x: photoX, y: photoY, 'text-anchor':'middle',
+        'dominant-baseline':'central', fill:'rgba(255,255,255,0.9)',
+        'font-size':13, 'font-weight':600,
+        style:"font-family:'Cormorant Garamond',serif" }, initials(m.name)));
+    }
+
+    // Name text below photo
+    const nameY = photoY + PHOTO_R + 11;
     const nameText = isDeceased ? `✝ ${firstName(m.name)}` : firstName(m.name);
-    g.appendChild(svgEl('text', { x:cx, y:cy-8, 'text-anchor':'middle', 'dominant-baseline':'central',
-      fill:nameColor, 'font-size':11, 'font-weight':500, style:"font-family:'DM Sans',sans-serif" }, nameText));
+    g.appendChild(svgEl('text', { x:cx, y:nameY, 'text-anchor':'middle',
+      'dominant-baseline':'central', fill:'rgba(255,255,255,0.95)',
+      'font-size':11, 'font-weight':600,
+      style:"font-family:'DM Sans',sans-serif" }, nameText));
 
-    // Second line: lifespan for deceased, profession for living
-    const subText = isDeceased ? `${m.born} – ${m.died}` :
-      (m.profession.length > 16 ? m.profession.substring(0,15)+'…' : m.profession);
-    g.appendChild(svgEl('text', { x:cx, y:cy+9, 'text-anchor':'middle', 'dominant-baseline':'central',
-      fill:subColor, 'font-size':9, style:"font-family:'DM Sans',sans-serif" }, subText));
+    // Profession / lifespan below name
+    const subY = nameY + 14;
+    const subText = isDeceased ? `${m.born}–${m.died}`
+      : (m.profession.length > 17 ? m.profession.substring(0,16)+'…' : m.profession);
+    g.appendChild(svgEl('text', { x:cx, y:subY, 'text-anchor':'middle',
+      'dominant-baseline':'central', fill:'rgba(255,255,255,0.6)',
+      'font-size':9, style:"font-family:'DM Sans',sans-serif" }, subText));
 
+    // Tooltip
     const tip = document.getElementById('tooltip');
     g.addEventListener('mousemove', e => {
-      tip.innerHTML = `<div class="tooltip-name">${m.name}${m.nickname?` <em style="font-size:11px;color:#bbb">"${m.nickname}"</em>`:''}</div>
+      tip.innerHTML = `<div class="tooltip-name">${m.name}${m.nickname?` <em style="font-size:11px;color:#aaa">"${m.nickname}"</em>`:''}</div>
         <div class="tooltip-detail">${m.profession}<br>${m.location}, ${m.country}<br>b. ${m.born}${m.died?` – ${m.died}`:''}</div>`;
       tip.classList.add('show');
-      tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-52)+'px';
+      tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-55)+'px';
     });
     g.addEventListener('mouseleave', () => tip.classList.remove('show'));
     g.addEventListener('click', () => openModal(m));
@@ -272,7 +320,14 @@ function openModal(m) {
   const spouse = m.spouseId ? byId(m.spouseId) : null;
   const relation = parent ? `${m.generation===2?'Child':'Grandchild'} of ${firstName(parent.name)}`
     : spouse ? `Married to ${firstName(spouse.name)}` : 'Founding generation';
-  document.getElementById('modal-avatar').textContent = initials(m.name);
+
+  const avatarEl = document.getElementById('modal-avatar');
+  if (m.photo) {
+    avatarEl.innerHTML = `<img src="${m.photo}" alt="${m.name}">`;
+  } else {
+    avatarEl.textContent = initials(m.name);
+  }
+
   document.getElementById('modal-name').textContent = m.name;
   document.getElementById('modal-nick').textContent = m.nickname ? `"${m.nickname}"` : '';
   document.getElementById('modal-relation').textContent = relation;
@@ -294,10 +349,12 @@ function openModal(m) {
 document.getElementById('modal-close').addEventListener('click', () => document.getElementById('modal-overlay').classList.remove('open'));
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.remove('open'); });
 
-// Boot — FAMILY_MEMBERS is already loaded from family.js above
-const units = buildUnits();
-const totalW = layoutAll(units);
-render(units, totalW);
+// Boot — preload photos first, then render
+preloadPhotos(FAMILY_MEMBERS).then(() => {
+  const units = buildUnits();
+  const totalW = layoutAll(units);
+  render(units, totalW);
+});
 </script>
 </body>
 </html>
