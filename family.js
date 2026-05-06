@@ -273,7 +273,7 @@ const FAMILY_MEMBERS = [
     profession: "Student",
     field: "Education",
     bio: "A big time Soccer Fan",
-    photo: "",
+    photo: "Photos/Ryan.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
@@ -290,7 +290,7 @@ const FAMILY_MEMBERS = [
     profession: "Student",
     field: "Education",
     bio: "Cute as Jewel",
-    photo: "",
+    photo: "Photos/Jewel.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
@@ -357,7 +357,7 @@ const FAMILY_MEMBERS = [
     profession: "Student",
     field: "Education",
     bio: "Cute as Serah",
-    photo: "Photos/Serah",
+    photo: "Photos/Serah.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
