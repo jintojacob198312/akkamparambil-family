@@ -71,7 +71,7 @@ const FAMILY_MEMBERS = [
     profession: "Service Sector",
     field: "Service",
     bio: "Built bridges — both literal and between family members.",
-    photo: "",
+    photo: "Photos/acchacko.jpeg",
     contact: { email: "jinto@example.com", phone: "+91-9876543210", whatsapp: "+91-9876543210" }
   },
   {
