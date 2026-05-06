@@ -226,40 +226,39 @@ const FAMILY_MEMBERS = [
     bio: "Studying Computer Science at Imperial College London.",
     photo: "",
     contact: { email: "", phone: "", whatsapp: "" }
-  },
-  {
+  },{
     id: 13,
     name: "Jinto Jacob Akkamparambil",
     nickname: "Jinto",
-    parentId: 3,
+    parentId: 3,        // ✅ son of Jinto (id:3)
     spouseId: 14,
     generation: 3,
     born: 1983,
     died: null,
-    location: "Kuruppanthara, Kerala",
+    location: "USA",
     country: "USA",
-    profession: "IT",
+    profession: "IT Architect",
     field: "Technology",
     bio: "IT Architect",
     photo: "",
-    contact: { email: "rajan@example.com", phone: "", whatsapp: "" }
+    contact: { email: "", phone: "", whatsapp: "" }
   },
   {
     id: 14,
     name: "Remyamol Jinto Akkamparambil",
     nickname: "Remy",
-    parentId: 3,
+    parentId: null,     // ✅ married in — NOT a child of id:3
     spouseId: 13,
     generation: 3,
     born: 1983,
     died: null,
-    location: "Kuruppanthara, Kerala",
+    location: "USA",
     country: "USA",
     profession: "Nurse",
     field: "Healthcare",
-    bio: "A loving MoM",
+    bio: "A loving Mom",
     photo: "",
-    contact: { email: "rajan@example.com", phone: "", whatsapp: "" }
+    contact: { email: "", phone: "", whatsapp: "" }
   }
   // ── ADD NEW MEMBERS BELOW THIS LINE ──────────────────────────────
   // ,{
