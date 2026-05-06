@@ -248,7 +248,7 @@ const FAMILY_MEMBERS = [
     id: 14,
     name: "Remyamol Jinto Akkamparambil",
     nickname: "Remy",
-    parentId: Null,
+    parentId: 3,
     spouseId: 13,
     generation: 3,
     born: 1983,
