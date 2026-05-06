@@ -10,23 +10,40 @@
     body { background: #FFFDF8; }
     .page-header {
       background: linear-gradient(160deg, #0A2424 0%, #0D3535 60%, #173F3F 100%);
-      padding: 7rem 2rem 3rem; text-align: center; position: relative; overflow: hidden;
+      padding: 5rem 2rem 2rem; text-align: center; position: relative; overflow: hidden;
     }
     .page-header::before {
       content: ''; position: absolute; inset: 0; pointer-events: none;
       background: radial-gradient(ellipse at 20% 50%, rgba(232,130,26,0.15) 0%, transparent 55%),
                   radial-gradient(ellipse at 80% 30%, rgba(212,160,23,0.1) 0%, transparent 45%);
     }
-    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: #fff; font-weight: 400; position: relative; }
-    .page-header p { color: rgba(255,255,255,0.5); margin-top: 0.75rem; font-size: 16px; position: relative; }
+    .page-header h1 { font-family: var(--font-display); font-size: clamp(32px,5vw,56px); color: #fff; font-weight: 400; position: relative; }
+    .page-header p { color: rgba(255,255,255,0.5); margin-top: 0.5rem; font-size: 15px; position: relative; }
+
     #tree-wrap {
-      overflow-x: auto; padding: 3rem 2rem 4rem; display: flex; justify-content: center;
+      overflow-x: auto; padding: 1.5rem 1rem 3rem;
+      display: flex; justify-content: flex-start;
       background: #FFFDF8;
+      -webkit-overflow-scrolling: touch;
     }
-    #tree-svg { display: block; }
+    /* On wider screens, centre the tree */
+    @media (min-width: 900px) {
+      #tree-wrap { justify-content: center; padding: 2rem 2rem 3rem; }
+    }
+    #tree-svg {
+      display: block;
+      /* Scale down on small screens so the whole tree fits */
+      max-width: 100%;
+    }
+    /* Mobile: scale the SVG to fit the screen width */
+    @media (max-width: 700px) {
+      #tree-wrap { padding: 1rem 0.5rem 2rem; }
+      #tree-svg { transform-origin: top left; }
+    }
+
     .tree-legend {
-      display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
-      padding: 1rem 2rem 4rem; font-size: 12px; background: #FFFDF8;
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      padding: 0.5rem 1.5rem 3rem; font-size: 12px; background: #FFFDF8;
     }
     .legend-item { display: flex; align-items: center; gap: 8px; color: #7A736A; }
     .legend-swatch { width: 28px; height: 3px; border-radius: 2px; }
@@ -77,7 +94,7 @@
   <div class="legend-item"><div class="legend-dot" style="background:#1A3A3A;border:1px solid rgba(0,0,0,0.15)"></div> Married in</div>
   <div class="legend-item"><div class="legend-swatch" style="background:#E8821A"></div> ♥ Married couple</div>
   <div class="legend-item"><div class="legend-swatch" style="background:rgba(0,0,0,0.15)"></div> Parent → child</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#5a5a5a;border:1px dashed rgba(0,0,0,0.3)"></div> ✝ Passed away</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3D3530;border:1px dashed rgba(255,180,60,0.5)"></div> <span style="color:#B8956A">✝ Passed away</span></div>
 </div>
 
 <!-- MODAL -->
@@ -239,66 +256,107 @@ function render(units, totalW) {
     const x = m.tx, y = m.ty, cx = x + NW/2;
     const isMarriedIn = !m.parentId;
     const isDeceased = !!m.died;
+
+    // Colors
     let fill = isMarriedIn ? MARRIED_IN : (GEN_COLORS[m.generation] || '#888');
-    if (isDeceased) fill = '#4a4a4a';
+    if (isDeceased) fill = '#3D3530';  // warm dark sepia for deceased
 
-    const g = svgEl('g', { style:'cursor:pointer', opacity: isDeceased ? '0.75' : '1' });
+    const g = svgEl('g', { style:'cursor:pointer' });
 
-    // Card background
+    // ── Card background ──
     g.appendChild(svgEl('rect', { x, y, width:NW, height:NH, rx:12, fill,
-      stroke: isDeceased ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
-      'stroke-width':1, 'stroke-dasharray': isDeceased ? '4 3' : 'none'
+      stroke: isDeceased ? 'rgba(255,220,180,0.3)' : 'rgba(255,255,255,0.1)',
+      'stroke-width': isDeceased ? 1.5 : 1,
+      'stroke-dasharray': isDeceased ? '5 3' : 'none'
     }));
+
+    // ── Deceased: warm sepia diagonal stripe overlay ──
+    if (isDeceased) {
+      const patId = `pat-${m.id}`;
+      const pat = svgEl('pattern', { id: patId, patternUnits:'userSpaceOnUse', width:8, height:8, patternTransform:'rotate(45)' });
+      const line = svgEl('line', { x1:0, y1:0, x2:0, y2:8, stroke:'rgba(255,200,150,0.06)', 'stroke-width':3 });
+      pat.appendChild(line);
+      defs.appendChild(pat);
+      g.appendChild(svgEl('rect', { x, y, width:NW, height:NH, rx:12, fill:`url(#${patId})` }));
+
+      // Amber ✝ badge in top-right corner — large and visible
+      g.appendChild(svgEl('rect', { x: x+NW-26, y: y+6, width:20, height:20, rx:4,
+        fill:'rgba(255,180,60,0.18)' }));
+      g.appendChild(svgEl('text', { x: x+NW-16, y: y+17, 'text-anchor':'middle',
+        'dominant-baseline':'central', fill:'#FFB43C',
+        'font-size':13, 'font-weight':700, style:'font-family:serif' }, '✝'));
+    }
 
     // ── Photo or initials circle ──
     const photoX = cx;
-    const photoY = y + PHOTO_R + 12;  // top padding + radius
+    const photoY = y + PHOTO_R + 12;
     const clipId = `clip-${m.id}`;
 
     if (m.photo && photoCache[m.photo] && photoCache[m.photo].complete && photoCache[m.photo].naturalWidth > 0) {
-      // Circular clip path
       const clipPath = svgEl('clipPath', { id: clipId });
       clipPath.appendChild(svgEl('circle', { cx: photoX, cy: photoY, r: PHOTO_R }));
       defs.appendChild(clipPath);
 
-      // White border ring
+      // Border ring — amber for deceased, white for living
       g.appendChild(svgEl('circle', { cx: photoX, cy: photoY, r: PHOTO_R + 2.5,
-        fill:'rgba(255,255,255,0.25)' }));
+        fill: isDeceased ? 'rgba(255,180,60,0.35)' : 'rgba(255,255,255,0.25)' }));
 
-      // Photo image clipped to circle
       const imgEl = svgEl('image', {
         href: m.photo,
         x: photoX - PHOTO_R, y: photoY - PHOTO_R,
         width: PHOTO_R * 2, height: PHOTO_R * 2,
         'clip-path': `url(#${clipId})`,
-        preserveAspectRatio: 'xMidYMid slice'
+        preserveAspectRatio: 'xMidYMid slice',
+        // Grayscale filter for deceased via feColorMatrix
+        filter: isDeceased ? `url(#gs-${m.id})` : ''
       });
+
+      // Grayscale filter for deceased photo
+      if (isDeceased) {
+        const filt = svgEl('filter', { id: `gs-${m.id}` });
+        const matrix = svgEl('feColorMatrix', { type:'saturate', values:'0.15' });
+        filt.appendChild(matrix);
+        defs.appendChild(filt);
+      }
+
       g.appendChild(imgEl);
     } else {
-      // Initials circle fallback
+      // Initials circle
       g.appendChild(svgEl('circle', { cx: photoX, cy: photoY, r: PHOTO_R,
-        fill:'rgba(255,255,255,0.18)' }));
+        fill: isDeceased ? 'rgba(255,180,60,0.15)' : 'rgba(255,255,255,0.18)',
+        stroke: isDeceased ? 'rgba(255,180,60,0.3)' : 'none', 'stroke-width': 1 }));
       g.appendChild(svgEl('text', { x: photoX, y: photoY, 'text-anchor':'middle',
-        'dominant-baseline':'central', fill:'rgba(255,255,255,0.92)',
+        'dominant-baseline':'central',
+        fill: isDeceased ? 'rgba(255,200,130,0.9)' : 'rgba(255,255,255,0.92)',
         'font-size':17, 'font-weight':600,
         style:"font-family:'Cormorant Garamond',serif" }, initials(m.name)));
     }
 
-    // Name text below photo
+    // ── Name ──
     const nameY = photoY + PHOTO_R + 13;
-    const nameText = isDeceased ? `✝ ${firstName(m.name)}` : firstName(m.name);
     g.appendChild(svgEl('text', { x:cx, y:nameY, 'text-anchor':'middle',
-      'dominant-baseline':'central', fill:'rgba(255,255,255,0.97)',
+      'dominant-baseline':'central',
+      fill: isDeceased ? 'rgba(255,220,180,0.95)' : 'rgba(255,255,255,0.97)',
       'font-size':14, 'font-weight':700,
-      style:"font-family:'DM Sans',sans-serif" }, nameText));
+      style:"font-family:'DM Sans',sans-serif" }, firstName(m.name)));
 
-    // Profession / lifespan below name
+    // ── Profession (living) or lifespan badge (deceased) ──
     const subY = nameY + 17;
-    const subText = isDeceased ? `${m.born}–${m.died}`
-      : (m.profession.length > 19 ? m.profession.substring(0,18)+'…' : m.profession);
-    g.appendChild(svgEl('text', { x:cx, y:subY, 'text-anchor':'middle',
-      'dominant-baseline':'central', fill:'rgba(255,255,255,0.65)',
-      'font-size':11, style:"font-family:'DM Sans',sans-serif" }, subText));
+    if (isDeceased) {
+      // Amber pill badge showing years lived
+      const badgeW = 72, badgeH = 16, badgeX = cx - badgeW/2;
+      g.appendChild(svgEl('rect', { x:badgeX, y:subY-8, width:badgeW, height:badgeH,
+        rx:8, fill:'rgba(255,180,60,0.2)', stroke:'rgba(255,180,60,0.35)', 'stroke-width':0.8 }));
+      g.appendChild(svgEl('text', { x:cx, y:subY, 'text-anchor':'middle',
+        'dominant-baseline':'central', fill:'#FFB43C',
+        'font-size':9.5, 'font-weight':600, style:"font-family:'DM Sans',sans-serif"
+      }, `${m.born} – ${m.died}`));
+    } else {
+      const subText = m.profession.length > 19 ? m.profession.substring(0,18)+'…' : m.profession;
+      g.appendChild(svgEl('text', { x:cx, y:subY, 'text-anchor':'middle',
+        'dominant-baseline':'central', fill:'rgba(255,255,255,0.65)',
+        'font-size':11, style:"font-family:'DM Sans',sans-serif" }, subText));
+    }
 
     // Tooltip
     const tip = document.getElementById('tooltip');
@@ -354,6 +412,28 @@ preloadPhotos(FAMILY_MEMBERS).then(() => {
   const units = buildUnits();
   const totalW = layoutAll(units);
   render(units, totalW);
+
+  // Auto-scale on mobile so tree fits screen width without horizontal scroll
+  function scaleMobile() {
+    const svg = document.getElementById('tree-svg');
+    const wrap = document.getElementById('tree-wrap');
+    const svgW = parseFloat(svg.getAttribute('width'));
+    const available = wrap.clientWidth - 16;
+    if (svgW > available) {
+      const scale = available / svgW;
+      svg.style.transform = `scale(${scale})`;
+      svg.style.transformOrigin = 'top left';
+      // Shrink the container height to match scaled height
+      const svgH = parseFloat(svg.getAttribute('height'));
+      wrap.style.minHeight = (svgH * scale + 40) + 'px';
+    } else {
+      svg.style.transform = '';
+      wrap.style.minHeight = '';
+    }
+  }
+
+  scaleMobile();
+  window.addEventListener('resize', scaleMobile);
 });
 </script>
 </body>
