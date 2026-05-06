@@ -7,25 +7,40 @@
   <link rel="stylesheet" href="style.css" />
   <script src="family.js"></script>
   <style>
-    body { background: var(--dark); }
-    .page-header { background: var(--dark); padding: 7rem 2rem 2rem; text-align: center; }
-    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: var(--white); font-weight: 400; }
-    .page-header p { color: rgba(255,255,255,0.4); margin-top: 0.75rem; font-size: 16px; }
-    #tree-wrap { overflow-x: auto; padding: 2rem 2rem 4rem; display: flex; justify-content: center; }
+    body { background: #FFFDF8; }
+    .page-header {
+      background: linear-gradient(160deg, #0A2424 0%, #0D3535 60%, #173F3F 100%);
+      padding: 7rem 2rem 3rem; text-align: center; position: relative; overflow: hidden;
+    }
+    .page-header::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 20% 50%, rgba(232,130,26,0.15) 0%, transparent 55%),
+                  radial-gradient(ellipse at 80% 30%, rgba(212,160,23,0.1) 0%, transparent 45%);
+    }
+    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: #fff; font-weight: 400; position: relative; }
+    .page-header p { color: rgba(255,255,255,0.5); margin-top: 0.75rem; font-size: 16px; position: relative; }
+    #tree-wrap {
+      overflow-x: auto; padding: 3rem 2rem 4rem; display: flex; justify-content: center;
+      background: #FFFDF8;
+    }
     #tree-svg { display: block; }
-    .tree-legend { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; padding: 0 2rem 4rem; font-size: 12px; }
-    .legend-item { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.4); }
+    .tree-legend {
+      display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;
+      padding: 1rem 2rem 4rem; font-size: 12px; background: #FFFDF8;
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; color: #7A736A; }
     .legend-swatch { width: 28px; height: 3px; border-radius: 2px; }
     .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
     .tree-tooltip {
-      position: fixed; background: var(--white); border-radius: 10px;
-      padding: 12px 16px; font-size: 13px; color: var(--ink);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2); pointer-events: none;
+      position: fixed; background: #fff; border-radius: 12px;
+      padding: 12px 16px; font-size: 13px; color: #1C1A16;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14); pointer-events: none;
       opacity: 0; transition: opacity 0.15s; z-index: 300; max-width: 220px;
+      border: 1px solid rgba(232,130,26,0.15);
     }
     .tree-tooltip.show { opacity: 1; }
-    .tooltip-name { font-family: 'Cormorant Garamond',serif; font-size: 16px; font-weight: 500; margin-bottom: 3px; }
-    .tooltip-detail { color: #888; font-size: 12px; line-height: 1.6; }
+    .tooltip-name { font-family: 'Cormorant Garamond',serif; font-size: 16px; font-weight: 500; margin-bottom: 3px; color: #1C1A16; }
+    .tooltip-detail { color: #7A736A; font-size: 12px; line-height: 1.6; }
     footer { background: var(--dark2); }
   </style>
 </head>
@@ -56,13 +71,13 @@
 </div>
 
 <div class="tree-legend">
-  <div class="legend-item"><div class="legend-dot" style="background:#C9A84C"></div> Generation 1</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#5b8cdb"></div> Generation 2</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#5bc4a0"></div> Generation 3</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#1e1e2e;border:1px solid rgba(255,255,255,0.2)"></div> Married in</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#C9A84C"></div> ♥ Married couple</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:rgba(255,255,255,0.2)"></div> Parent → child</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#3a3a3a;border:1px dashed rgba(255,255,255,0.3)"></div> ✝ Passed away</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#E8821A"></div> Generation 1</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0D6E6E"></div> Generation 2</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2E9E5A"></div> Generation 3</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1A3A3A;border:1px solid rgba(0,0,0,0.15)"></div> Married in</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#E8821A"></div> ♥ Married couple</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:rgba(0,0,0,0.15)"></div> Parent → child</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#5a5a5a;border:1px dashed rgba(0,0,0,0.3)"></div> ✝ Passed away</div>
 </div>
 
 <!-- MODAL -->
@@ -96,8 +111,9 @@
 
 const NW = 114, NH = 54;
 const COUPLE_GAP = 22, SIBLING_GAP = 38, GEN_V = 145, COUPLE_DROP = 12;
-const GEN_COLORS = { 1:'#C9A84C', 2:'#5b8cdb', 3:'#5bc4a0' };
-const MARRIED_IN = '#1e1e2e';
+// Bright Kerala palette: saffron / deep teal / forest green
+const GEN_COLORS = { 1:'#E8821A', 2:'#0D6E6E', 3:'#2E9E5A' };
+const MARRIED_IN = '#1A3A3A';
 
 const byId = id => FAMILY_MEMBERS.find(m => m.id === id);
 const initials = n => n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
@@ -185,18 +201,18 @@ function render(units, totalW) {
     const midY = blood.ty + NH / 2;
     if (spouse) {
       const x1 = blood.tx + NW, x2 = spouse.tx;
-      lG.appendChild(svgEl('line', { x1, y1:midY, x2, y2:midY, stroke:'#C9A84C', 'stroke-width':2.5, 'stroke-linecap':'round' }));
-      lG.appendChild(svgEl('text', { x:(x1+x2)/2, y:midY+1, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':10, fill:'#C9A84C', style:'font-family:sans-serif' }, '♥'));
-      lG.appendChild(svgEl('line', { x1:jx, y1:midY, x2:jx, y2:jy, stroke:'#C9A84C', 'stroke-width':1.5, 'stroke-dasharray':'4 3' }));
+      lG.appendChild(svgEl('line', { x1, y1:midY, x2, y2:midY, stroke:'#E8821A', 'stroke-width':2.5, 'stroke-linecap':'round' }));
+      lG.appendChild(svgEl('text', { x:(x1+x2)/2, y:midY+1, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':10, fill:'#E8821A', style:'font-family:sans-serif' }, '♥'));
+      lG.appendChild(svgEl('line', { x1:jx, y1:midY, x2:jx, y2:jy, stroke:'#E8821A', 'stroke-width':1.5, 'stroke-dasharray':'4 3' }));
     } else {
-      lG.appendChild(svgEl('line', { x1:jx, y1:blood.ty+NH, x2:jx, y2:jy, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
+      lG.appendChild(svgEl('line', { x1:jx, y1:blood.ty+NH, x2:jx, y2:jy, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
     }
     if (children.length) {
       const hBarY = jy + COUPLE_DROP;
       const xs = children.map(c => c.jx);
-      lG.appendChild(svgEl('line', { x1:jx, y1:jy, x2:jx, y2:hBarY, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
-      if (children.length > 1) lG.appendChild(svgEl('line', { x1:Math.min(...xs), y1:hBarY, x2:Math.max(...xs), y2:hBarY, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 }));
-      children.forEach(child => lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-8, stroke:'rgba(255,255,255,0.15)', 'stroke-width':1.5 })));
+      lG.appendChild(svgEl('line', { x1:jx, y1:jy, x2:jx, y2:hBarY, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
+      if (children.length > 1) lG.appendChild(svgEl('line', { x1:Math.min(...xs), y1:hBarY, x2:Math.max(...xs), y2:hBarY, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
+      children.forEach(child => lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-8, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 })));
     }
     drawNode(blood, nG);
     if (spouse) drawNode(spouse, nG);
@@ -212,12 +228,10 @@ function render(units, totalW) {
     let fill = isMarriedIn ? MARRIED_IN : (GEN_COLORS[m.generation] || '#888');
     if (isDeceased) fill = '#3a3a3a';
 
-    const nameColor = isDeceased ? 'rgba(255,255,255,0.5)'
-      : (!isMarriedIn && m.generation===1) ? '#1a1a24'
-      : isMarriedIn ? 'rgba(255,255,255,0.55)' : '#ffffff';
-    const subColor = isDeceased ? 'rgba(255,255,255,0.28)'
-      : (!isMarriedIn && m.generation===1) ? 'rgba(0,0,0,0.5)'
-      : isMarriedIn ? 'rgba(255,255,255,0.28)' : 'rgba(255,255,255,0.6)';
+    const nameColor = isDeceased ? 'rgba(255,255,255,0.6)'
+      : '#ffffff';
+    const subColor = isDeceased ? 'rgba(255,255,255,0.35)'
+      : 'rgba(255,255,255,0.75)';
 
     const g = svgEl('g', { style:'cursor:pointer', opacity: isDeceased ? '0.7' : '1' });
 
