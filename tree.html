@@ -21,24 +21,17 @@
     .page-header p { color: rgba(255,255,255,0.5); margin-top: 0.5rem; font-size: 15px; position: relative; }
 
     #tree-wrap {
-      overflow-x: auto; padding: 1.5rem 1rem 3rem;
-      display: flex; justify-content: flex-start;
+      overflow: hidden;
+      padding: 1.5rem 0 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
       background: #FFFDF8;
-      -webkit-overflow-scrolling: touch;
-    }
-    /* On wider screens, centre the tree */
-    @media (min-width: 900px) {
-      #tree-wrap { justify-content: center; padding: 2rem 2rem 3rem; }
+      width: 100%;
     }
     #tree-svg {
       display: block;
-      /* Scale down on small screens so the whole tree fits */
-      max-width: 100%;
-    }
-    /* Mobile: scale the SVG to fit the screen width */
-    @media (max-width: 700px) {
-      #tree-wrap { padding: 1rem 0.5rem 2rem; }
-      #tree-svg { transform-origin: top left; }
+      flex-shrink: 0;
     }
 
     .tree-legend {
@@ -413,27 +406,30 @@ preloadPhotos(FAMILY_MEMBERS).then(() => {
   const totalW = layoutAll(units);
   render(units, totalW);
 
-  // Auto-scale on mobile so tree fits screen width without horizontal scroll
-  function scaleMobile() {
+  // Always scale tree to fill the full available width
+  function scaleTree() {
     const svg = document.getElementById('tree-svg');
     const wrap = document.getElementById('tree-wrap');
     const svgW = parseFloat(svg.getAttribute('width'));
-    const available = wrap.clientWidth - 16;
-    if (svgW > available) {
-      const scale = available / svgW;
-      svg.style.transform = `scale(${scale})`;
-      svg.style.transformOrigin = 'top left';
-      // Shrink the container height to match scaled height
-      const svgH = parseFloat(svg.getAttribute('height'));
-      wrap.style.minHeight = (svgH * scale + 40) + 'px';
-    } else {
-      svg.style.transform = '';
-      wrap.style.minHeight = '';
-    }
+    const svgH = parseFloat(svg.getAttribute('height'));
+    const padding = 32;
+    const available = Math.max(wrap.clientWidth - padding, 200);
+
+    // Scale to fill width — both up (small tree) and down (large tree)
+    const scale = available / svgW;
+
+    svg.style.transform = `scale(${scale})`;
+    svg.style.transformOrigin = 'top center';
+
+    // Set wrap height so content below isn't hidden behind the scaled SVG
+    wrap.style.height = (svgH * scale + 48) + 'px';
+    wrap.style.display = 'flex';
+    wrap.style.alignItems = 'flex-start';
+    wrap.style.justifyContent = 'center';
   }
 
-  scaleMobile();
-  window.addEventListener('resize', scaleMobile);
+  scaleTree();
+  window.addEventListener('resize', scaleTree);
 });
 </script>
 </body>
