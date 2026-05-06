@@ -230,7 +230,7 @@ const FAMILY_MEMBERS = [
     id: 13,
     name: "Jinto Jacob Akkamparambil",
     nickname: "Jinto",
-    parentId: 3,        // ✅ son of Jinto (id:3)
+    parentId: 2,        // ✅ son of Jinto (id:3)
     spouseId: 14,
     generation: 3,
     born: 1983,
@@ -297,7 +297,7 @@ const FAMILY_MEMBERS = [
     id: 17,
     name: "Jino Jacob Akkamparambil",
     nickname: "Jino",
-    parentId: 3,        // ✅ son of Jinto (id:3)
+    parentId: 2,        // ✅ son of Jinto (id:3)
     spouseId: 18,
     generation: 3,
     born: 1982,
@@ -357,7 +357,7 @@ const FAMILY_MEMBERS = [
     profession: "Student",
     field: "Education",
     bio: "Cute as Serah",
-    photo: "Photos/Serah.jpeg",
+    photo: "Photos/Serah.jpg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
@@ -381,7 +381,7 @@ const FAMILY_MEMBERS = [
     id: 22,
     name: "Jeo Jacob Akkamparambil",
     nickname: "Jeo",
-    parentId: 3,        // ✅ son of Jinto (id:3)
+    parentId: 2,        // ✅ son of Jinto (id:3)
     spouseId: 23,
     generation: 3,
     born: 1989,
