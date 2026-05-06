@@ -240,7 +240,7 @@ const FAMILY_MEMBERS = [
     profession: "IT Architect",
     field: "Technology",
     bio: "IT Architect",
-    photo: "",
+    photo: "Photos/Jinto.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
@@ -257,7 +257,7 @@ const FAMILY_MEMBERS = [
     profession: "Nurse",
     field: "Healthcare",
     bio: "A loving Mom",
-    photo: "",
+    photo: "Photos/Remya.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },{
     id: 15,
