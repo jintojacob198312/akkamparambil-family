@@ -63,7 +63,9 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// Country coordinates lookup
+// ── Data comes directly from family.js — FAMILY_MEMBERS is already loaded ──
+
+// Country fallback coordinates (used if city not found)
 const countryCoords = {
   'India': [20.5937, 78.9629],
   'UAE': [23.4241, 53.8478],
@@ -76,82 +78,128 @@ const countryCoords = {
   'Qatar': [25.2854, 51.5310],
   'Kuwait': [29.3759, 47.9774],
   'Bahrain': [26.0667, 50.5577],
-  'Oman': [21.4735, 55.9754]
+  'Oman': [21.4735, 55.9754],
+  'Saudi Arabia': [23.8859, 45.0792],
+  'New Zealand': [-40.9006, 174.8860],
+  'Ireland': [53.1424, -7.6921],
 };
 
+// ── ADD YOUR CITIES HERE if a pin is missing ──
+// Get coords from Google Maps: right-click a city → copy the numbers shown
 const cityCoords = {
-  'Kuruppanthara, Kerala': [9.7500, 76.6000],
-  'Thrissur, Kerala': [10.5276, 76.2144],
-  'Ernakulam, Kerala': [9.9816, 76.2999],
-  'Bangalore, Karnataka': [12.9716, 77.5946],
-  'Mumbai, Maharashtra': [19.0760, 72.8777],
-  'Dubai': [25.2048, 55.2708],
-  'London': [51.5074, -0.1278],
-  'Toronto': [43.6532, -79.3832],
-  'New Jersey, USA': [40.0583, -74.4057],
-  'Sydney': [-33.8688, 151.2093],
+  // Kerala
+  'Thrissur, Kerala':       [10.5276, 76.2144],
+  'Ernakulam, Kerala':      [9.9816,  76.2999],
+  'Kottayam, Kerala':       [9.5916,  76.5222],
+  'Kuruppanthara, Kerala':  [9.6800,  76.6200],
+  'Kochi, Kerala':          [9.9312,  76.2673],
+  'Trivandrum, Kerala':     [8.5241,  76.9366],
+  'Calicut, Kerala':        [11.2588, 75.7804],
+  'Kannur, Kerala':         [11.8745, 75.3704],
+  'Palakkad, Kerala':       [10.7867, 76.6548],
+  'Kollam, Kerala':         [8.8932,  76.6141],
+  'Pathanamthitta, Kerala': [9.2648,  76.7870],
+  'Alappuzha, Kerala':      [9.4981,  76.3388],
+  // Other India
+  'Bangalore, Karnataka':   [12.9716, 77.5946],
+  'Mumbai, Maharashtra':    [19.0760, 72.8777],
+  'Delhi':                  [28.6139, 77.2090],
+  'Chennai, Tamil Nadu':    [13.0827, 80.2707],
+  'Hyderabad':              [17.3850, 78.4867],
+  'Pune, Maharashtra':      [18.5204, 73.8567],
+  // Middle East
+  'Dubai':                  [25.2048, 55.2708],
+  'Abu Dhabi':              [24.4539, 54.3773],
+  'Sharjah':                [25.3463, 55.4209],
+  'Doha':                   [25.2854, 51.5310],
+  'Riyadh':                 [24.7136, 46.6753],
+  'Muscat':                 [23.5880, 58.3829],
+  'Kuwait City':            [29.3759, 47.9774],
+  'Bahrain':                [26.0667, 50.5577],
+  // Europe
+  'London':                 [51.5074, -0.1278],
+  'Dublin':                 [53.3498, -6.2603],
+  'Paris':                  [48.8566,  2.3522],
+  'Frankfurt':              [50.1109,  8.6821],
+  // North America
+  'Toronto':                [43.6532, -79.3832],
+  'New Jersey, USA':        [40.0583, -74.4057],
+  'New York, USA':          [40.7128, -74.0060],
+  'California, USA':        [36.7783,-119.4179],
+  'Texas, USA':             [31.9686, -99.9018],
+  'Chicago, USA':           [41.8781, -87.6298],
+  'Houston, USA':           [29.7604, -95.3698],
+  'Florida, USA':           [27.9944, -81.7603],
+  'USA':                    [37.0902, -95.7129],
+  // Oceania
+  'Sydney':                 [-33.8688, 151.2093],
+  'Melbourne':              [-37.8136, 144.9631],
 };
 
 const countryFlags = {
-  'India': '🇮🇳', 'UAE': '🇦🇪', 'UK': '🇬🇧', 'USA': '🇺🇸',
-  'Canada': '🇨🇦', 'Australia': '🇦🇺', 'Germany': '🇩🇪',
-  'Singapore': '🇸🇬', 'Qatar': '🇶🇦', 'Kuwait': '🇰🇼'
+  'India':'🇮🇳','UAE':'🇦🇪','UK':'🇬🇧','USA':'🇺🇸',
+  'Canada':'🇨🇦','Australia':'🇦🇺','Germany':'🇩🇪',
+  'Singapore':'🇸🇬','Qatar':'🇶🇦','Kuwait':'🇰🇼',
+  'Bahrain':'🇧🇭','Oman':'🇴🇲','Saudi Arabia':'🇸🇦',
+  'New Zealand':'🇳🇿','Ireland':'🇮🇪','France':'🇫🇷',
 };
 
-const map = L.map('map', {
-  center: [20, 40], zoom: 2.5,
-  zoomControl: true,
-  scrollWheelZoom: false
-});
-
+// ── Map setup ──
+const map = L.map('map', { center: [20, 40], zoom: 2.5, scrollWheelZoom: false });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '© OpenStreetMap, © CartoDB',
   subdomains: 'abcd', maxZoom: 19
 }).addTo(map);
 
-const goldIcon = L.divIcon({
+const pinIcon = L.divIcon({
   className: '',
-  html: `<div style="width:14px;height:14px;border-radius:50%;background:#C9A84C;border:2px solid #fff;box-shadow:0 2px 8px rgba(201,168,76,0.5);"></div>`,
-  iconSize: [14, 14], iconAnchor: [7, 7]
+  html: `<div style="width:16px;height:16px;border-radius:50%;background:#E8821A;border:2.5px solid #fff;box-shadow:0 2px 10px rgba(232,130,26,0.55);"></div>`,
+  iconSize: [16, 16], iconAnchor: [8, 8]
 });
 
-Promise.resolve({ members: FAMILY_MEMBERS })
-  .then(r => r.json())
-  .then(data => {
-    const members = data.members;
-    const byCityKey = {};
+// ── Plot pins directly from FAMILY_MEMBERS ──
+const members = FAMILY_MEMBERS;
+const byCityKey = {};
 
-    members.forEach(m => {
-      const key = `${m.location}, ${m.country}`;
-      if (!byCityKey[key]) byCityKey[key] = [];
-      byCityKey[key].push(m);
-    });
+members.forEach(m => {
+  const key = `${m.location}, ${m.country}`;
+  if (!byCityKey[key]) byCityKey[key] = [];
+  byCityKey[key].push(m);
+});
 
-    Object.entries(byCityKey).forEach(([key, mems]) => {
-      let coords = cityCoords[key] || cityCoords[mems[0].location];
-      if (!coords) coords = countryCoords[mems[0].country];
-      if (!coords) return;
+Object.entries(byCityKey).forEach(([key, mems]) => {
+  // Try: "City, Country" key → city only → country fallback
+  let coords = cityCoords[key]
+    || cityCoords[mems[0].location]
+    || countryCoords[mems[0].country];
+  if (!coords) return; // skip if no match found
 
-      const names = mems.map(m => `<div>• ${m.name} <span style="color:#aaa">(${m.profession})</span></div>`).join('');
-      const popup = `<div class="popup-name">${mems[0].location}</div><div class="popup-detail">${names}</div>`;
-      L.marker(coords, { icon: goldIcon }).addTo(map).bindPopup(popup);
-    });
+  const names = mems.map(m =>
+    `<div>• ${m.name} <span style="color:#aaa;font-size:11px">(${m.profession})</span></div>`
+  ).join('');
+  const popup = `<div class="popup-name">${mems[0].location}</div><div class="popup-detail">${names}</div>`;
+  L.marker(coords, { icon: pinIcon }).addTo(map).bindPopup(popup);
+});
 
-    // Country list
-    const byCountry = {};
-    members.forEach(m => {
-      if (!byCountry[m.country]) byCountry[m.country] = 0;
-      byCountry[m.country]++;
-    });
+// ── Country list at bottom ──
+const byCountry = {};
+members.forEach(m => {
+  if (!byCountry[m.country]) byCountry[m.country] = 0;
+  byCountry[m.country]++;
+});
 
-    const countryList = document.getElementById('country-list');
-    Object.entries(byCountry).sort((a,b) => b[1]-a[1]).forEach(([country, count]) => {
-      const card = document.createElement('div');
-      card.className = 'country-card';
-      card.innerHTML = `<div class="country-flag">${countryFlags[country] || '🌍'}</div><div><div class="country-name">${country}</div><div class="country-count">${count} member${count > 1 ? 's' : ''}</div></div>`;
-      countryList.appendChild(card);
-    });
-  });
+const countryList = document.getElementById('country-list');
+Object.entries(byCountry).sort((a,b) => b[1]-a[1]).forEach(([country, count]) => {
+  const card = document.createElement('div');
+  card.className = 'country-card';
+  card.innerHTML = `
+    <div class="country-flag">${countryFlags[country] || '🌍'}</div>
+    <div>
+      <div class="country-name">${country}</div>
+      <div class="country-count">${count} member${count > 1 ? 's' : ''}</div>
+    </div>`;
+  countryList.appendChild(card);
+});
 </script>
 </body>
 </html>
