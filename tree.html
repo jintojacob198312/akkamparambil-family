@@ -84,6 +84,8 @@
   <div class="legend-item"><div class="legend-dot" style="background:#E8821A"></div> Generation 1</div>
   <div class="legend-item"><div class="legend-dot" style="background:#0D6E6E"></div> Generation 2</div>
   <div class="legend-item"><div class="legend-dot" style="background:#2E9E5A"></div> Generation 3</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7B3FA0"></div> Generation 4</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#C0392B"></div> Generation 5</div>
   <div class="legend-item"><div class="legend-dot" style="background:#1A3A3A;border:1px solid rgba(0,0,0,0.15)"></div> Married in</div>
   <div class="legend-item"><div class="legend-swatch" style="background:#E8821A"></div> ♥ Married couple</div>
   <div class="legend-item"><div class="legend-swatch" style="background:rgba(0,0,0,0.15)"></div> Parent → child</div>
@@ -121,7 +123,13 @@
 const NW = 160, NH = 115;   // bigger nodes — clearly readable
 const PHOTO_R = 34;         // larger circular photo
 const COUPLE_GAP = 30, SIBLING_GAP = 56, GEN_V = 195, COUPLE_DROP = 16;
-const GEN_COLORS = { 1:'#E8821A', 2:'#0D6E6E', 3:'#2E9E5A' };
+const GEN_COLORS = {
+  1: '#E8821A',  // Saffron orange   — Grandparents
+  2: '#0D6E6E',  // Deep teal        — Parents / Aunts / Uncles
+  3: '#2E9E5A',  // Forest green     — Children / Cousins
+  4: '#7B3FA0',  // Rich purple      — Grandchildren
+  5: '#C0392B',  // Deep crimson     — Great-grandchildren
+};
 const MARRIED_IN = '#1A3A3A';
 
 const byId = id => FAMILY_MEMBERS.find(m => m.id === id);
