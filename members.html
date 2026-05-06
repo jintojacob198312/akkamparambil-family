@@ -152,7 +152,7 @@ function renderMembers(members, filter = 'all', query = '') {
 
   const byGen = {};
   filtered.forEach(m => { if (!byGen[m.generation]) byGen[m.generation] = []; byGen[m.generation].push(m); });
-  const genLabels = { 1:'First Generation', 2:'Second Generation', 3:'Third Generation' };
+  const genLabels = { 1:'First Generation', 2:'Second Generation', 3:'Third Generation', 4: 'Fourth Generation', 5: 'Fifth Generation' };
 
   Object.keys(byGen).sort().forEach(gen => {
     const label = document.createElement('div');
