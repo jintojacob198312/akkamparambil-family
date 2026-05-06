@@ -292,6 +292,141 @@ const FAMILY_MEMBERS = [
     bio: "Cute as Jewel",
     photo: "",
     contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 17,
+    name: "Jino Jacob Akkamparambil",
+    nickname: "Jino",
+    parentId: 3,        // ✅ son of Jinto (id:3)
+    spouseId: 18,
+    generation: 3,
+    born: 1982,
+    died: null,
+    location: "Kuruppanthara, Kerala",
+    country: "India",
+    profession: "Real Estate",
+    field: "Service",
+    bio: "Real Estate",
+    photo: "Photos/Jino.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 18,
+    name: "Leena Jino Akkamparambil",
+    nickname: "Leena",
+    parentId: null,     // ✅ married in — NOT a child of id:3
+    spouseId: 17,
+    generation: 3,
+    born: 1982,
+    died: null,
+    location: "Kuruppanthara, Kerala",
+    country: "India",
+    profession: "Bank Manager",
+    field: "Finance",
+    bio: "A Working MoM",
+    photo: "Photos/Leena.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },{
+    id: 19,
+    name: "Sana Jino Akkamparambil",
+    nickname: "Sana",
+    parentId: 17,        // ✅ son of Jinto (id:3)
+    spouseId: null,
+    generation: 4,
+    born: 2013,
+    died: null,
+    location: "Kuruppanthara, Kerala",
+    country: "India",
+    profession: "Student",
+    field: "Education",
+    bio: "Cute as Sana",
+    photo: "Photos/Sana.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 20,
+    name: "Serah Jino Akkamparambil",
+    nickname: "Serah",
+    parentId: 17,     // ✅ Daughter of Jinto
+    spouseId: null,
+    generation: 4,
+    born: 2014,
+    died: null,
+    location: "Kuruppanthara, Kerala",
+    country: "India",
+    profession: "Student",
+    field: "Education",
+    bio: "Cute as Serah",
+    photo: "Photos/Serah",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 21,
+    name: "Serena Jino Akkamparambil",
+    nickname: "Serena",
+    parentId: 17,     // ✅ Daughter of Jinto
+    spouseId: null,
+    generation: 4,
+    born: 2016,
+    died: null,
+    location: "Kuruppanthara, Kerala",
+    country: "India",
+    profession: "Student",
+    field: "Education",
+    bio: "Cute as Serena",
+    photo: "Photos/Serah",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 22,
+    name: "Jeo Jacob Akkamparambil",
+    nickname: "Jeo",
+    parentId: 3,        // ✅ son of Jinto (id:3)
+    spouseId: 23,
+    generation: 3,
+    born: 1989,
+    died: null,
+    location: "Ireland",
+    country: "Ireland",
+    profession: "Graphics",
+    field: "Technology",
+    bio: "Gaphics Genieus",
+    photo: "Photos/Jeo.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 23,
+    name: "Chinchu Jeo Akkamparambil",
+    nickname: "Chinchu",
+    parentId: null,     // ✅ married in — NOT a child of id:3
+    spouseId: 22,
+    generation: 3,
+    born: 1990,
+    died: null,
+    location: "Ireland",
+    country: "Ireland",
+    profession: "Nurse",
+    field: "Healthcare",
+    bio: "A commmitted Nurse",
+    photo: "Photos/Chinchu.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 24,
+    name: "Mia Akkamparambil",
+    nickname: "Mia",
+    parentId: 22,        // ✅ son of Jinto (id:3)
+    spouseId: null,
+    generation: 4,
+    born: 2016,
+    died: null,
+    location: "Ireland",
+    country: "Ireland",
+    profession: "Student",
+    field: "Education",
+    bio: "Cute as Mia",
+    photo: "Photos/Mia.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
   }
   // ── ADD NEW MEMBERS BELOW THIS LINE ──────────────────────────────
   // ,{
