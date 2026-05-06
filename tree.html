@@ -108,9 +108,9 @@
 <script>
 
 // ── All data comes from family.js (loaded above via <script src>) ──
-const NW = 134, NH = 90;    // larger nodes to fit photo + text
-const PHOTO_R = 27;         // circular photo radius
-const COUPLE_GAP = 26, SIBLING_GAP = 48, GEN_V = 170, COUPLE_DROP = 14;
+const NW = 160, NH = 115;   // bigger nodes — clearly readable
+const PHOTO_R = 34;         // larger circular photo
+const COUPLE_GAP = 30, SIBLING_GAP = 56, GEN_V = 195, COUPLE_DROP = 16;
 const GEN_COLORS = { 1:'#E8821A', 2:'#0D6E6E', 3:'#2E9E5A' };
 const MARRIED_IN = '#1A3A3A';
 
@@ -214,7 +214,7 @@ function render(units, totalW) {
 
   function drawUnit(unit) {
     const { blood, spouse, jx, jy, children } = unit;
-    const midY = blood.ty + NH / 2;
+    const midY = blood.ty + PHOTO_R + 12; // align with photo center, not node center
     if (spouse) {
       const x1 = blood.tx + NW, x2 = spouse.tx;
       lG.appendChild(svgEl('line', { x1, y1:midY, x2, y2:midY, stroke:'#E8821A', 'stroke-width':2.5, 'stroke-linecap':'round' }));
@@ -251,8 +251,8 @@ function render(units, totalW) {
     }));
 
     // ── Photo or initials circle ──
-    const photoX = cx;          // center of photo circle
-    const photoY = y + PHOTO_R + 10;  // top padding + radius
+    const photoX = cx;
+    const photoY = y + PHOTO_R + 12;  // top padding + radius
     const clipId = `clip-${m.id}`;
 
     if (m.photo && photoCache[m.photo] && photoCache[m.photo].complete && photoCache[m.photo].naturalWidth > 0) {
@@ -279,26 +279,26 @@ function render(units, totalW) {
       g.appendChild(svgEl('circle', { cx: photoX, cy: photoY, r: PHOTO_R,
         fill:'rgba(255,255,255,0.18)' }));
       g.appendChild(svgEl('text', { x: photoX, y: photoY, 'text-anchor':'middle',
-        'dominant-baseline':'central', fill:'rgba(255,255,255,0.9)',
-        'font-size':13, 'font-weight':600,
+        'dominant-baseline':'central', fill:'rgba(255,255,255,0.92)',
+        'font-size':17, 'font-weight':600,
         style:"font-family:'Cormorant Garamond',serif" }, initials(m.name)));
     }
 
     // Name text below photo
-    const nameY = photoY + PHOTO_R + 11;
+    const nameY = photoY + PHOTO_R + 13;
     const nameText = isDeceased ? `✝ ${firstName(m.name)}` : firstName(m.name);
     g.appendChild(svgEl('text', { x:cx, y:nameY, 'text-anchor':'middle',
-      'dominant-baseline':'central', fill:'rgba(255,255,255,0.95)',
-      'font-size':11, 'font-weight':600,
+      'dominant-baseline':'central', fill:'rgba(255,255,255,0.97)',
+      'font-size':14, 'font-weight':700,
       style:"font-family:'DM Sans',sans-serif" }, nameText));
 
     // Profession / lifespan below name
-    const subY = nameY + 14;
+    const subY = nameY + 17;
     const subText = isDeceased ? `${m.born}–${m.died}`
-      : (m.profession.length > 17 ? m.profession.substring(0,16)+'…' : m.profession);
+      : (m.profession.length > 19 ? m.profession.substring(0,18)+'…' : m.profession);
     g.appendChild(svgEl('text', { x:cx, y:subY, 'text-anchor':'middle',
-      'dominant-baseline':'central', fill:'rgba(255,255,255,0.6)',
-      'font-size':9, style:"font-family:'DM Sans',sans-serif" }, subText));
+      'dominant-baseline':'central', fill:'rgba(255,255,255,0.65)',
+      'font-size':11, style:"font-family:'DM Sans',sans-serif" }, subText));
 
     // Tooltip
     const tip = document.getElementById('tooltip');
