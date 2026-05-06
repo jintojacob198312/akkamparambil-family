@@ -259,6 +259,39 @@ const FAMILY_MEMBERS = [
     bio: "A loving Mom",
     photo: "",
     contact: { email: "", phone: "", whatsapp: "" }
+  },{
+    id: 15,
+    name: "Ryan Jinto Akkamparambil",
+    nickname: "Ponnus",
+    parentId: 13,        // ✅ son of Jinto (id:3)
+    spouseId: null,
+    generation: 4,
+    born: 2015,
+    died: null,
+    location: "USA",
+    country: "USA",
+    profession: "Student",
+    field: "Education",
+    bio: "A big time Soccer Fan",
+    photo: "",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 16,
+    name: "Jewel Jinto Akkamparambil",
+    nickname: "Malus",
+    parentId: 13,     // ✅ Daughter of Jinto
+    spouseId: null,
+    generation: 4,
+    born: 2015,
+    died: null,
+    location: "USA",
+    country: "USA",
+    profession: "Student",
+    field: "Education",
+    bio: "Cute as Jewel",
+    photo: "",
+    contact: { email: "", phone: "", whatsapp: "" }
   }
   // ── ADD NEW MEMBERS BELOW THIS LINE ──────────────────────────────
   // ,{
