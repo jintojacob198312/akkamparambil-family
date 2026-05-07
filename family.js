@@ -128,7 +128,7 @@ const FAMILY_MEMBERS = [
     id: 7,
     name: "Lijo Jose Akkamparambil",
     nickname: "Lijo",
-    parentId: 3,
+    parentId: 5,
     spouseId: 8,
     generation: 4,
     born: 1975,
@@ -162,7 +162,7 @@ const FAMILY_MEMBERS = [
     id: 9,
     name: "Laiju Jose Akkamparambil",
     nickname: "Laiju",
-    parentId: 3,
+    parentId: 5,
     spouseId: 10,
     generation: 4,
     born: 1978,
@@ -196,7 +196,7 @@ const FAMILY_MEMBERS = [
     id: 11,
     name: "Jisha Anil Thekkechirayil",
     nickname: "Jisha",
-    parentId: 3,
+    parentId: 5,
     spouseId: 12,
     generation: 4,
     born: 1981,
@@ -638,7 +638,7 @@ const FAMILY_MEMBERS = [
     id: 37,
     name: "Jinto Jacob Akkamparambil",
     nickname: "Jinto",
-    parentId: 30,        // ✅ son of Jinto (id:3)
+    parentId: 29,        // ✅ son of Jinto (id:3)
     spouseId: 38,
     generation: 3,
     born: 1983,
@@ -705,7 +705,7 @@ const FAMILY_MEMBERS = [
     id: 41,
     name: "Jino Jacob Akkamparambil",
     nickname: "Jino",
-    parentId: 30,        // ✅ son of Jinto (id:3)
+    parentId: 29,        // ✅ son of Jinto (id:3)
     spouseId: 42,
     generation: 3,
     born: 1982,
@@ -789,7 +789,7 @@ const FAMILY_MEMBERS = [
     id: 46,
     name: "Jeo Jacob Akkamparambil",
     nickname: "Jeo",
-    parentId: 30,        
+    parentId: 29,        
     spouseId: 47,
     generation: 3,
     born: 1989,
