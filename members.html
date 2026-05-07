@@ -133,29 +133,13 @@ function getRelation(member, members) {
       const spouse = members.find(m => m.id === member.spouseId);
       return spouse ? `Spouse of ${spouse.name.split(' ')[0]}` : 'Family member';
     }
-    return 'Family member';
+    return 'Founding generation';
   }
   const parent = members.find(m => m.id === member.parentId);
   if (!parent) return '';
-  const parentName = parent.name.split(' ')[0];
-
-  // Walk up the blood tree to find the nearest gen-1 ancestor
-  // and count how many steps away this member is from gen 1
-  function depthFromGen1(m, visited = new Set()) {
-    if (!m.parentId) return 0;
-    if (visited.has(m.id)) return 0;
-    visited.add(m.id);
-    const p = members.find(x => x.id === m.parentId);
-    if (!p) return 0;
-    return 1 + depthFromGen1(p, visited);
-  }
-
-  const depth = depthFromGen1(member);
-  if (depth === 1) return `Child of ${parentName}`;
-  if (depth === 2) return `Grandchild of ${parentName}`;
-  if (depth === 3) return `Great-grandchild of ${parentName}`;
-  if (depth === 4) return `Great-great-grandchild of ${parentName}`;
-  return `Descendant of ${parentName}`;
+  // Always show direct parent relationship — clearest and most accurate
+  const role = parent.generation === 1 ? 'Child' : 'Child';
+  return `Child of ${parent.name.split(' ')[0]}`;
 }
 
 function renderMembers(members, filter = 'all', query = '') {
