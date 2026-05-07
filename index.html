@@ -157,6 +157,7 @@
   <div class="section-inner">
     <span class="section-tag">Family members</span>
     <h2 class="section-title" style="color:var(--white)">Our family</h2>
+    <p style="color:rgba(255,255,255,0.4);font-size:14px;margin-bottom:0.5rem">Showing Generation 1–3 · <a href="members.html" style="color:var(--saffron-lite)">View all members for full directory</a></p>
     <div class="recent-grid" id="recent-grid">
       <!-- populated by JS -->
     </div>
@@ -186,25 +187,47 @@
   const gens = [...new Set(members.map(m => m.generation))];
   document.getElementById('stat-gen').textContent = gens.length;
 
-  // Recent members preview grid (first 8)
+  // Show Generation 1, 2 and 3 members on home page
   const grid = document.getElementById('recent-grid');
-  members.slice(0, 8).forEach(m => {
-    const initials = m.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-    const card = document.createElement('a');
-    card.href = 'members.html';
-    card.className = 'recent-card';
-    card.innerHTML = `
-      <div class="recent-photo">
-        ${m.photo
-          ? `<img src="${m.photo}" alt="${m.name}">`
-          : `<div class="recent-photo-initials">${initials}</div>`
-        }
-      </div>
-      <div class="recent-info">
-        <div class="recent-name">${m.name}</div>
-        <div class="recent-loc">${m.location}, ${m.country}</div>
-      </div>`;
-    grid.appendChild(card);
+
+  // Group by generation with labels
+  [1, 2, 3].forEach(gen => {
+    const genMembers = members.filter(m => m.generation === gen);
+    if (!genMembers.length) return;
+
+    const genNames = { 1: 'Generation 1', 2: 'Generation 2', 3: 'Generation 3' };
+    const label = document.createElement('div');
+    label.style.cssText = `
+      grid-column: 1 / -1; font-family: var(--font-display);
+      font-size: 22px; font-weight: 400; color: rgba(255,255,255,0.5);
+      padding: 1rem 0 0.25rem; border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 0.25rem; letter-spacing: 0.02em;
+    `;
+    label.textContent = genNames[gen];
+    grid.appendChild(label);
+
+    genMembers.forEach(m => {
+      const initials = m.name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+      const card = document.createElement('a');
+      card.href = 'members.html';
+      card.className = 'recent-card';
+
+      // Only use photo if it's a real path (not empty string)
+      const hasPhoto = m.photo && m.photo.trim() !== '';
+      card.innerHTML = `
+        <div class="recent-photo">
+          ${hasPhoto
+            ? `<img src="${m.photo}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+               <div class="recent-photo-initials" style="display:none">${initials}</div>`
+            : `<div class="recent-photo-initials">${initials}</div>`
+          }
+        </div>
+        <div class="recent-info">
+          <div class="recent-name">${m.name}</div>
+          <div class="recent-loc">${m.location}, ${m.country}</div>
+        </div>`;
+      grid.appendChild(card);
+    });
   });
 </script>
 </body>
