@@ -633,7 +633,8 @@ const FAMILY_MEMBERS = [
     bio: "Studying Computer Science at Imperial College London.",
     photo: "",
     contact: { email: "", phone: "", whatsapp: "" }
-  },{
+  },
+  {
     id: 37,
     name: "Jinto Jacob Akkamparambil",
     nickname: "Jinto",
