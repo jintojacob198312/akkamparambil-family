@@ -627,7 +627,7 @@ const FAMILY_MEMBERS = [
     born: 2002,
     died: null,
     location: "Peruva, Kerala",
-    country: "india",
+    country: "India",
     profession: "CS Student",
     field: "Engineering",
     bio: "Studying Computer Science at Imperial College London.",
