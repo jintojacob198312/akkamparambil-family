@@ -128,9 +128,34 @@ function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
 }
 function getRelation(member, members) {
-  if (!member.parentId) return member.spouseId ? 'Founding generation' : 'Family member';
+  if (!member.parentId) {
+    if (member.spouseId) {
+      const spouse = members.find(m => m.id === member.spouseId);
+      return spouse ? `Spouse of ${spouse.name.split(' ')[0]}` : 'Family member';
+    }
+    return 'Family member';
+  }
   const parent = members.find(m => m.id === member.parentId);
-  return parent ? `${parent.generation === 1 ? 'Child' : 'Grandchild'} of ${parent.name.split(' ')[0]}` : '';
+  if (!parent) return '';
+  const parentName = parent.name.split(' ')[0];
+
+  // Walk up the blood tree to find the nearest gen-1 ancestor
+  // and count how many steps away this member is from gen 1
+  function depthFromGen1(m, visited = new Set()) {
+    if (!m.parentId) return 0;
+    if (visited.has(m.id)) return 0;
+    visited.add(m.id);
+    const p = members.find(x => x.id === m.parentId);
+    if (!p) return 0;
+    return 1 + depthFromGen1(p, visited);
+  }
+
+  const depth = depthFromGen1(member);
+  if (depth === 1) return `Child of ${parentName}`;
+  if (depth === 2) return `Grandchild of ${parentName}`;
+  if (depth === 3) return `Great-grandchild of ${parentName}`;
+  if (depth === 4) return `Great-great-grandchild of ${parentName}`;
+  return `Descendant of ${parentName}`;
 }
 
 function renderMembers(members, filter = 'all', query = '') {
@@ -152,7 +177,7 @@ function renderMembers(members, filter = 'all', query = '') {
 
   const byGen = {};
   filtered.forEach(m => { if (!byGen[m.generation]) byGen[m.generation] = []; byGen[m.generation].push(m); });
-  const genLabels = { 1:'First Generation', 2:'Second Generation', 3:'Third Generation', 4: 'Fourth Generation', 5: 'Fifth Generation' };
+  const genLabels = { 1:'First Generation', 2:'Second Generation', 3:'Third Generation', 4:'Fourth Generation', 5:'Fifth Generation' };
 
   Object.keys(byGen).sort().forEach(gen => {
     const label = document.createElement('div');
