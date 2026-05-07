@@ -22,16 +22,48 @@
 
     #tree-wrap {
       overflow: hidden;
-      padding: 1.5rem 0 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      padding: 0;
+      display: block;
       background: #FFFDF8;
       width: 100%;
+      height: 72vh;
+      position: relative;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
     }
     #tree-svg {
       display: block;
-      flex-shrink: 0;
+      position: absolute;
+      top: 0; left: 0;
+      will-change: transform;
+    }
+    /* Zoom controls */
+    .zoom-controls {
+      position: absolute; bottom: 20px; right: 20px;
+      display: flex; align-items: center; gap: 6px; z-index: 50;
+    }
+    .zoom-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--white); border: 1.5px solid var(--border-light);
+      font-size: 18px; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; color: var(--ink); transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-family: var(--font-body);
+    }
+    .zoom-btn:hover { background: var(--saffron-pale); border-color: var(--saffron); color: var(--saffron); }
+    .zoom-fit {
+      padding: 0 14px; border-radius: 20px; font-size: 13px; width: auto;
+      font-weight: 500; letter-spacing: 0.02em;
+    }
+    #zoom-label {
+      background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 20px; padding: 0 12px; height: 36px;
+      display: flex; align-items: center; font-size: 12px;
+      color: var(--muted); font-family: var(--font-body); min-width: 52px;
+      justify-content: center;
+    }
+    .zoom-hint {
+      position: absolute; bottom: 20px; left: 20px; z-index: 50;
+      font-size: 11px; color: var(--muted); background: rgba(255,253,248,0.9);
+      padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-light);
     }
 
     .tree-legend {
@@ -78,6 +110,13 @@
 
 <div id="tree-wrap">
   <svg id="tree-svg"></svg>
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="btn-zoom-out" title="Zoom out">−</button>
+    <div id="zoom-label">100%</div>
+    <button class="zoom-btn" id="btn-zoom-in" title="Zoom in">+</button>
+    <button class="zoom-btn zoom-fit" id="btn-fit" title="Fit to screen">⊡ Fit</button>
+  </div>
+  <div class="zoom-hint">🖱 Scroll to zoom · Drag to pan</div>
 </div>
 
 <div class="tree-legend">
@@ -233,14 +272,14 @@ function render(units, totalW) {
       lG.appendChild(svgEl('text', { x:(x1+x2)/2, y:midY+1, 'text-anchor':'middle', 'dominant-baseline':'central', 'font-size':11, fill:'#E8821A', style:'font-family:sans-serif' }, '♥'));
       lG.appendChild(svgEl('line', { x1:jx, y1:midY, x2:jx, y2:jy, stroke:'#E8821A', 'stroke-width':1.5, 'stroke-dasharray':'4 3' }));
     } else {
-      lG.appendChild(svgEl('line', { x1:jx, y1:blood.ty+NH, x2:jx, y2:jy, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
+      lG.appendChild(svgEl('line', { x1:jx, y1:blood.ty+NH, x2:jx, y2:jy, stroke:'rgba(0,0,0,0.45)', 'stroke-width':2 }));
     }
     if (children.length) {
       const hBarY = jy + COUPLE_DROP;
       const xs = children.map(c => c.jx);
-      lG.appendChild(svgEl('line', { x1:jx, y1:jy, x2:jx, y2:hBarY, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
-      if (children.length > 1) lG.appendChild(svgEl('line', { x1:Math.min(...xs), y1:hBarY, x2:Math.max(...xs), y2:hBarY, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 }));
-      children.forEach(child => lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-10, stroke:'rgba(0,0,0,0.18)', 'stroke-width':1.5 })));
+      lG.appendChild(svgEl('line', { x1:jx, y1:jy, x2:jx, y2:hBarY, stroke:'rgba(0,0,0,0.45)', 'stroke-width':2 }));
+      if (children.length > 1) lG.appendChild(svgEl('line', { x1:Math.min(...xs), y1:hBarY, x2:Math.max(...xs), y2:hBarY, stroke:'rgba(0,0,0,0.45)', 'stroke-width':2 }));
+      children.forEach(child => lG.appendChild(svgEl('line', { x1:child.jx, y1:hBarY, x2:child.jx, y2:child.blood.ty-10, stroke:'rgba(0,0,0,0.45)', 'stroke-width':2 })));
     }
     drawNode(blood, nG, defs);
     if (spouse) drawNode(spouse, nG, defs);
@@ -415,30 +454,134 @@ preloadPhotos(FAMILY_MEMBERS).then(() => {
   const totalW = layoutAll(units);
   render(units, totalW);
 
-  // Always scale tree to fill the full available width
-  function scaleTree() {
-    const svg = document.getElementById('tree-svg');
-    const wrap = document.getElementById('tree-wrap');
-    const svgW = parseFloat(svg.getAttribute('width'));
-    const svgH = parseFloat(svg.getAttribute('height'));
-    const padding = 32;
-    const available = Math.max(wrap.clientWidth - padding, 200);
+  const svg = document.getElementById('tree-svg');
+  const wrap = document.getElementById('tree-wrap');
+  const svgW = parseFloat(svg.getAttribute('width'));
+  const svgH = parseFloat(svg.getAttribute('height'));
 
-    // Scale to fill width — both up (small tree) and down (large tree)
-    const scale = available / svgW;
+  // ── Zoom & Pan state ──
+  let scale = 1, panX = 0, panY = 0;
+  let isDragging = false, startX = 0, startY = 0, lastPanX = 0, lastPanY = 0;
 
-    svg.style.transform = `scale(${scale})`;
-    svg.style.transformOrigin = 'top center';
-
-    // Set wrap height so content below isn't hidden behind the scaled SVG
-    wrap.style.height = (svgH * scale + 48) + 'px';
-    wrap.style.display = 'flex';
-    wrap.style.alignItems = 'flex-start';
-    wrap.style.justifyContent = 'center';
+  function applyTransform() {
+    svg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    svg.style.transformOrigin = '0 0';
   }
 
-  scaleTree();
-  window.addEventListener('resize', scaleTree);
+  function fitToScreen() {
+    const wrapW = wrap.clientWidth - 40;
+    const wrapH = Math.max(wrap.clientHeight - 40, 400);
+    const scaleX = wrapW / svgW;
+    const scaleY = wrapH / svgH;
+    scale = Math.min(scaleX, scaleY, 1); // never scale above 100%
+    // Center the tree
+    panX = (wrap.clientWidth - svgW * scale) / 2;
+    panY = 20;
+    applyTransform();
+  }
+
+  // Set wrap to fixed viewport height
+  wrap.style.height = '72vh';
+  wrap.style.overflow = 'hidden';
+  wrap.style.cursor = 'grab';
+  wrap.style.userSelect = 'none';
+  svg.style.position = 'relative';
+
+  fitToScreen();
+
+  // ── Mouse wheel zoom ──
+  wrap.addEventListener('wheel', e => {
+    e.preventDefault();
+    const rect = wrap.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(Math.max(scale * delta, 0.15), 3);
+    // Zoom toward mouse position
+    panX = mouseX - (mouseX - panX) * (newScale / scale);
+    panY = mouseY - (mouseY - panY) * (newScale / scale);
+    scale = newScale;
+    applyTransform();
+    updateZoomLabel();
+  }, { passive: false });
+
+  // ── Mouse drag pan ──
+  wrap.addEventListener('mousedown', e => {
+    if (e.target.closest('g[style*="cursor:pointer"]')) return; // let node clicks through
+    isDragging = true;
+    startX = e.clientX - panX;
+    startY = e.clientY - panY;
+    wrap.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+    wrap.style.cursor = 'grab';
+  });
+
+  // ── Touch pinch & pan ──
+  let lastTouchDist = 0, lastTouchX = 0, lastTouchY = 0;
+  wrap.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      lastTouchDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+    } else if (e.touches.length === 1) {
+      lastTouchX = e.touches[0].clientX;
+      lastTouchY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const delta = dist / lastTouchDist;
+      scale = Math.min(Math.max(scale * delta, 0.15), 3);
+      lastTouchDist = dist;
+      applyTransform();
+      updateZoomLabel();
+    } else if (e.touches.length === 1) {
+      panX += e.touches[0].clientX - lastTouchX;
+      panY += e.touches[0].clientY - lastTouchY;
+      lastTouchX = e.touches[0].clientX;
+      lastTouchY = e.touches[0].clientY;
+      applyTransform();
+    }
+  }, { passive: false });
+
+  // ── Control buttons ──
+  function updateZoomLabel() {
+    const btn = document.getElementById('zoom-label');
+    if (btn) btn.textContent = Math.round(scale * 100) + '%';
+  }
+
+  document.getElementById('btn-zoom-in').addEventListener('click', () => {
+    scale = Math.min(scale * 1.25, 3);
+    panX = wrap.clientWidth/2 - (wrap.clientWidth/2 - panX) * 1.25;
+    panY = wrap.clientHeight/2 - (wrap.clientHeight/2 - panY) * 1.25;
+    applyTransform(); updateZoomLabel();
+  });
+  document.getElementById('btn-zoom-out').addEventListener('click', () => {
+    scale = Math.max(scale * 0.8, 0.15);
+    panX = wrap.clientWidth/2 - (wrap.clientWidth/2 - panX) * 0.8;
+    panY = wrap.clientHeight/2 - (wrap.clientHeight/2 - panY) * 0.8;
+    applyTransform(); updateZoomLabel();
+  });
+  document.getElementById('btn-fit').addEventListener('click', () => {
+    fitToScreen(); updateZoomLabel();
+  });
+
+  updateZoomLabel();
+  window.addEventListener('resize', () => { fitToScreen(); updateZoomLabel(); });
 });
 </script>
 </body>
