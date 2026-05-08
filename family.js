@@ -71,7 +71,7 @@ const FAMILY_MEMBERS = [
     profession: "Entrepreneur",
     field: "Business",
     bio: "A Loving Father",
-    photo: "Photos/Kriachan.jpeg",
+    photo: "Photos/Kuriachan.jpeg",
  },
  {
     id: 4,
@@ -87,7 +87,7 @@ const FAMILY_MEMBERS = [
     profession: "Homemaker",
     field: "Homemaker",
     bio: "Dedicated nurse with 18 years of experience in ICU care.",
-    photo: "",
+    photo: "Photos/Aliamma.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
 {
