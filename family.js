@@ -529,7 +529,7 @@ const FAMILY_MEMBERS = [
     profession: "Tailor",
     field: "Service",
     bio: "Dedicated educator, shaping young minds for over 20 years.",
-    photo: "",
+    photo: "Photos/Mariamma.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
