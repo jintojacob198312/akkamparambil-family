@@ -8,24 +8,65 @@
   <script src="family.js"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
-    .page-header { background: var(--dark); padding: 7rem 2rem 2rem; text-align: center; }
-    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: var(--white); font-weight: 400; }
-    .page-header p { color: rgba(255,255,255,0.4); margin-top: 0.75rem; font-size: 16px; }
-    #map { height: 520px; width: 100%; }
-    .map-wrap { max-width: 1100px; margin: 3rem auto 0; padding: 0 2rem; }
-    .leaflet-popup-content-wrapper {
-      border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important;
+    .page-header {
+      background: linear-gradient(160deg, #0A2424 0%, #0D3535 60%, #173F3F 100%);
+      padding: 5rem 2rem 2rem; text-align: center;
     }
-    .popup-name { font-family: 'Cormorant Garamond',serif; font-size: 17px; font-weight: 500; margin-bottom: 2px; }
-    .popup-detail { font-size: 12px; color: #888; line-height: 1.6; }
-    .country-list { max-width: 1100px; margin: 3rem auto 5rem; padding: 0 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .page-header h1 { font-family: var(--font-display); font-size: clamp(36px,5vw,64px); color: #fff; font-weight: 400; }
+    .page-header p { color: rgba(255,255,255,0.4); margin-top: 0.5rem; font-size: 16px; }
+
+    /* ── Country badges strip ── */
+    .country-strip {
+      background: var(--bg2); border-bottom: 1px solid var(--border-light);
+      padding: 14px 2rem; overflow-x: auto; white-space: nowrap;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .country-strip-label {
+      font-size: 11px; color: var(--muted); letter-spacing: 0.1em;
+      text-transform: uppercase; flex-shrink: 0; margin-right: 4px;
+    }
+    .country-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--white); border: 1.5px solid var(--border-light);
+      border-radius: 20px; padding: 5px 14px; font-size: 13px;
+      font-family: var(--font-body); color: var(--ink); white-space: nowrap;
+      flex-shrink: 0; transition: all 0.2s; cursor: pointer;
+    }
+    .country-badge:hover { border-color: var(--saffron); color: var(--saffron); }
+    .country-badge .flag { font-size: 16px; }
+    .country-badge .cnt {
+      background: var(--saffron-pale); color: var(--saffron);
+      border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 500;
+    }
+
+    /* ── Map ── */
+    .map-wrap { max-width: 100%; margin: 0; padding: 2rem; background: var(--light); }
+    .map-inner { max-width: 1200px; margin: 0 auto; }
+    #map { height: 560px; width: 100%; border-radius: 16px; overflow: hidden; border: 1.5px solid var(--border-light); box-shadow: var(--shadow); }
+
+    .leaflet-popup-content-wrapper { border-radius: 12px !important; box-shadow: 0 8px 32px rgba(0,0,0,0.15) !important; }
+    .popup-name { font-family: 'Cormorant Garamond',serif; font-size: 17px; font-weight: 500; margin-bottom: 4px; color: #1C1A16; }
+    .popup-detail { font-size: 12px; color: #888; line-height: 1.8; }
+
+    /* ── Country grid below map ── */
+    .country-section { max-width: 1200px; margin: 2.5rem auto 5rem; padding: 0 2rem; }
+    .country-section-title {
+      font-family: var(--font-display); font-size: 28px; font-weight: 400;
+      margin-bottom: 1.25rem; padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .country-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
     .country-card {
-      background: var(--white); border: 1px solid var(--border-light);
-      border-radius: var(--radius-sm); padding: 16px; display: flex; align-items: center; gap: 12px;
+      background: var(--white); border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 16px 20px;
+      display: flex; align-items: center; gap: 14px;
+      transition: all 0.2s; cursor: pointer;
     }
-    .country-flag { font-size: 24px; }
-    .country-name { font-weight: 500; font-size: 14px; }
-    .country-count { font-size: 12px; color: var(--muted); }
+    .country-card:hover { border-color: rgba(232,130,26,0.3); box-shadow: var(--shadow-warm); transform: translateY(-2px); }
+    .country-flag { font-size: 28px; }
+    .country-name { font-weight: 500; font-size: 15px; color: var(--ink); }
+    .country-count { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .country-members { font-size: 11px; color: var(--muted); margin-top: 4px; font-style: italic; line-height: 1.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   </style>
 </head>
 <body>
@@ -45,16 +86,28 @@
 </nav>
 
 <div class="page-header">
-  <span class="section-tag" style="color:var(--gold)">Across the globe</span>
+  <span class="section-tag" style="color:var(--saffron-lite)">Across the globe</span>
   <h1>Where We Live</h1>
-  <p>From Kerala to five continents — our family has spread far and wide.</p>
+  <p>From Kerala to every corner of the world — our family has spread far and wide.</p>
 </div>
 
+<!-- Country badges strip -->
+<div class="country-strip" id="country-strip">
+  <span class="country-strip-label">Countries</span>
+</div>
+
+<!-- Map -->
 <div class="map-wrap">
-  <div id="map" style="border-radius: 16px; overflow: hidden; border: 1px solid var(--border-light);"></div>
+  <div class="map-inner">
+    <div id="map"></div>
+  </div>
 </div>
 
-<div class="country-list" id="country-list"></div>
+<!-- Country detail grid -->
+<div class="country-section">
+  <div class="country-section-title">Family around the world</div>
+  <div class="country-grid" id="country-list"></div>
+</div>
 
 <footer>
   <div class="footer-brand">Akkamparambil</div>
@@ -63,93 +116,114 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// ── Data comes directly from family.js — FAMILY_MEMBERS is already loaded ──
-
-// Country fallback coordinates (used if city not found)
 const countryCoords = {
-  'India': [20.5937, 78.9629],
-  'UAE': [23.4241, 53.8478],
-  'UK': [51.5074, -0.1278],
-  'USA': [37.0902, -95.7129],
-  'Canada': [56.1304, -106.3468],
-  'Australia': [-25.2744, 133.7751],
-  'Germany': [51.1657, 10.4515],
-  'Singapore': [1.3521, 103.8198],
-  'Qatar': [25.2854, 51.5310],
-  'Kuwait': [29.3759, 47.9774],
-  'Bahrain': [26.0667, 50.5577],
-  'Oman': [21.4735, 55.9754],
-  'Saudi Arabia': [23.8859, 45.0792],
-  'New Zealand': [-40.9006, 174.8860],
-  'Ireland': [53.1424, -7.6921],
+  'India':        [20.5937,   78.9629],
+  'UAE':          [23.4241,   53.8478],
+  'UK':           [51.5074,   -0.1278],
+  'USA':          [37.0902,  -95.7129],
+  'Canada':       [56.1304, -106.3468],
+  'Australia':    [-25.2744, 133.7751],
+  'Germany':      [51.1657,   10.4515],
+  'Singapore':    [1.3521,   103.8198],
+  'Qatar':        [25.2854,   51.5310],
+  'Kuwait':       [29.3759,   47.9774],
+  'Bahrain':      [26.0667,   50.5577],
+  'Oman':         [21.4735,   55.9754],
+  'Saudi Arabia': [23.8859,   45.0792],
+  'New Zealand':  [-40.9006, 174.8860],
+  'Ireland':      [53.1424,   -7.6921],
+  'Italy':        [41.8719,   12.5674],
 };
 
-// ── ADD YOUR CITIES HERE if a pin is missing ──
-// Get coords from Google Maps: right-click a city → copy the numbers shown
 const cityCoords = {
   // Kerala
-  'Thrissur, Kerala':       [10.5276, 76.2144],
-  'Ernakulam, Kerala':      [9.9816,  76.2999],
-  'Kottayam, Kerala':       [9.5916,  76.5222],
-  'Kuruppanthara, Kerala':  [9.6800,  76.6200],
-  'Kochi, Kerala':          [9.9312,  76.2673],
-  'Trivandrum, Kerala':     [8.5241,  76.9366],
-  'Calicut, Kerala':        [11.2588, 75.7804],
-  'Kannur, Kerala':         [11.8745, 75.3704],
-  'Palakkad, Kerala':       [10.7867, 76.6548],
-  'Kollam, Kerala':         [8.8932,  76.6141],
-  'Pathanamthitta, Kerala': [9.2648,  76.7870],
-  'Alappuzha, Kerala':      [9.4981,  76.3388],
-  'Peruva, Kerala':         [9.8833,  76.5167],
-  'Aroor, Kerala':          [9.8745,  76.3012],
+  'Thrissur, Kerala':       [10.5276,  76.2144],
+  'Ernakulam, Kerala':      [9.9816,   76.2999],
+  'Kottayam, Kerala':       [9.5916,   76.5222],
+  'Kuruppanthara, Kerala':  [9.6800,   76.6200],
+  'Kochi, Kerala':          [9.9312,   76.2673],
+  'Trivandrum, Kerala':     [8.5241,   76.9366],
+  'Calicut, Kerala':        [11.2588,  75.7804],
+  'Kannur, Kerala':         [11.8745,  75.3704],
+  'Palakkad, Kerala':       [10.7867,  76.6548],
+  'Kollam, Kerala':         [8.8932,   76.6141],
+  'Pathanamthitta, Kerala': [9.2648,   76.7870],
+  'Alappuzha, Kerala':      [9.4981,   76.3388],
+  'Peruva, Kerala':         [9.8833,   76.5167],
+  'Aroor, Kerala':          [9.8745,   76.3012],
   // Other India
-  'Bangalore, Karnataka':   [12.9716, 77.5946],
-  'Mumbai, Maharashtra':    [19.0760, 72.8777],
-  'Delhi':                  [28.6139, 77.2090],
-  'Chennai, Tamil Nadu':    [13.0827, 80.2707],
-  'Hyderabad':              [17.3850, 78.4867],
-  'Pune, Maharashtra':      [18.5204, 73.8567],
+  'Bangalore, Karnataka':   [12.9716,  77.5946],
+  'Mumbai, Maharashtra':    [19.0760,  72.8777],
+  'Delhi':                  [28.6139,  77.2090],
+  'Chennai, Tamil Nadu':    [13.0827,  80.2707],
+  'Hyderabad':              [17.3850,  78.4867],
+  'Pune, Maharashtra':      [18.5204,  73.8567],
   // Middle East
-  'Dubai':                  [25.2048, 55.2708],
-  'Abu Dhabi':              [24.4539, 54.3773],
-  'Sharjah':                [25.3463, 55.4209],
-  'Doha':                   [25.2854, 51.5310],
-  'Riyadh':                 [24.7136, 46.6753],
-  'Muscat':                 [23.5880, 58.3829],
-  'Kuwait City':            [29.3759, 47.9774],
-  'Bahrain':                [26.0667, 50.5577],
-  'Manama, Bahrain':        [26.2235, 50.5876],
+  'Dubai':                  [25.2048,  55.2708],
+  'Abu Dhabi':              [24.4539,  54.3773],
+  'Sharjah':                [25.3463,  55.4209],
+  'Doha':                   [25.2854,  51.5310],
+  'Riyadh':                 [24.7136,  46.6753],
+  'Muscat':                 [23.5880,  58.3829],
+  'Kuwait City':            [29.3759,  47.9774],
+  'Bahrain':                [26.0667,  50.5577],
+  'Manama, Bahrain':        [26.2235,  50.5876],
   // Europe
-  'London':                 [51.5074, -0.1278],
-  'Dublin':                 [53.3498, -6.2603],
-  'Paris':                  [48.8566,  2.3522],
-  'Frankfurt':              [50.1109,  8.6821],
+  'London':                 [51.5074,  -0.1278],
+  'Dublin':                 [53.3498,  -6.2603],
+  'Paris':                  [48.8566,   2.3522],
+  'Frankfurt':              [50.1109,   8.6821],
+  'Italy, Italy':           [41.8719,  12.5674],
   // North America
-  'Toronto':                [43.6532, -79.3832],
-  'New Jersey, USA':        [40.0583, -74.4057],
-  'New York, USA':          [40.7128, -74.0060],
-  'California, USA':        [36.7783,-119.4179],
-  'Texas, USA':             [31.9686, -99.9018],
-  'Chicago, USA':           [41.8781, -87.6298],
-  'Houston, USA':           [29.7604, -95.3698],
-  'Florida, USA':           [27.9944, -81.7603],
-  'USA':                    [37.0902, -95.7129],
+  'Toronto':                [43.6532,  -79.3832],
+  'New Jersey, USA':        [40.0583,  -74.4057],
+  'New York, USA':          [40.7128,  -74.0060],
+  'California, USA':        [36.7783, -119.4179],
+  'Texas, USA':             [31.9686,  -99.9018],
+  'Chicago, USA':           [41.8781,  -87.6298],
+  'Houston, USA':           [29.7604,  -95.3698],
+  'Florida, USA':           [27.9944,  -81.7603],
+  'USA':                    [37.0902,  -95.7129],
   // Oceania
   'Sydney':                 [-33.8688, 151.2093],
   'Melbourne':              [-37.8136, 144.9631],
 };
 
 const countryFlags = {
-  'India':'🇮🇳','UAE':'🇦🇪','UK':'🇬🇧','USA':'🇺🇸',
-  'Canada':'🇨🇦','Australia':'🇦🇺','Germany':'🇩🇪',
-  'Singapore':'🇸🇬','Qatar':'🇶🇦','Kuwait':'🇰🇼',
-  'Bahrain':'🇧🇭','Oman':'🇴🇲','Saudi Arabia':'🇸🇦',
-  'New Zealand':'🇳🇿','Ireland':'🇮🇪','France':'🇫🇷',
-  'Bahrain': '🇧🇭',
+  'India':'🇮🇳', 'UAE':'🇦🇪', 'UK':'🇬🇧', 'USA':'🇺🇸',
+  'Canada':'🇨🇦', 'Australia':'🇦🇺', 'Germany':'🇩🇪',
+  'Singapore':'🇸🇬', 'Qatar':'🇶🇦', 'Kuwait':'🇰🇼',
+  'Bahrain':'🇧🇭', 'Oman':'🇴🇲', 'Saudi Arabia':'🇸🇦',
+  'New Zealand':'🇳🇿', 'Ireland':'🇮🇪', 'France':'🇫🇷',
+  'Italy':'🇮🇹',
 };
 
-// ── Map setup ──
-const map = L.map('map', { center: [20, 40], zoom: 2.5, scrollWheelZoom: false });
+// ── Build country data ──
+const members = FAMILY_MEMBERS;
+const byCountry = {};
+members.forEach(m => {
+  if (!byCountry[m.country]) byCountry[m.country] = [];
+  byCountry[m.country].push(m);
+});
+
+// ── Country badges strip (top) ──
+const strip = document.getElementById('country-strip');
+Object.entries(byCountry).sort((a,b) => b[1].length - a[1].length).forEach(([country, mems]) => {
+  const badge = document.createElement('div');
+  badge.className = 'country-badge';
+  badge.innerHTML = `
+    <span class="flag">${countryFlags[country] || '🌍'}</span>
+    <span>${country}</span>
+    <span class="cnt">${mems.length}</span>`;
+  badge.addEventListener('click', () => {
+    const coords = countryCoords[country];
+    if (coords) { map.setView(coords, 5, { animate: true }); }
+  });
+  strip.appendChild(badge);
+});
+
+// ── Map — auto-fit to show all family pins ──
+const map = L.map('map', { scrollWheelZoom: true });
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '© OpenStreetMap, © CartoDB',
   subdomains: 'abcd', maxZoom: 19
@@ -161,47 +235,54 @@ const pinIcon = L.divIcon({
   iconSize: [16, 16], iconAnchor: [8, 8]
 });
 
-// ── Plot pins directly from FAMILY_MEMBERS ──
-const members = FAMILY_MEMBERS;
+// Group members by city
 const byCityKey = {};
-
 members.forEach(m => {
   const key = `${m.location}, ${m.country}`;
   if (!byCityKey[key]) byCityKey[key] = [];
   byCityKey[key].push(m);
 });
 
+// Add markers and collect bounds
+const allMarkers = [];
 Object.entries(byCityKey).forEach(([key, mems]) => {
-  // Try: "City, Country" key → city only → country fallback
   let coords = cityCoords[key]
     || cityCoords[mems[0].location]
     || countryCoords[mems[0].country];
-  if (!coords) return; // skip if no match found
+  if (!coords) return;
 
   const names = mems.map(m =>
     `<div>• ${m.name} <span style="color:#aaa;font-size:11px">(${m.profession})</span></div>`
   ).join('');
   const popup = `<div class="popup-name">${mems[0].location}</div><div class="popup-detail">${names}</div>`;
-  L.marker(coords, { icon: pinIcon }).addTo(map).bindPopup(popup);
+  const marker = L.marker(coords, { icon: pinIcon }).addTo(map).bindPopup(popup);
+  allMarkers.push(coords);
 });
 
-// ── Country list at bottom ──
-const byCountry = {};
-members.forEach(m => {
-  if (!byCountry[m.country]) byCountry[m.country] = 0;
-  byCountry[m.country]++;
-});
+// Auto-fit map to show all pins on first load
+if (allMarkers.length > 0) {
+  const bounds = L.latLngBounds(allMarkers);
+  map.fitBounds(bounds, { padding: [40, 40] });
+}
 
+// ── Country detail grid (below map) ──
 const countryList = document.getElementById('country-list');
-Object.entries(byCountry).sort((a,b) => b[1]-a[1]).forEach(([country, count]) => {
+Object.entries(byCountry).sort((a,b) => b[1].length - a[1].length).forEach(([country, mems]) => {
+  const names = mems.slice(0, 3).map(m => m.name.split(' ')[0]).join(', ')
+    + (mems.length > 3 ? ` +${mems.length - 3} more` : '');
   const card = document.createElement('div');
   card.className = 'country-card';
   card.innerHTML = `
     <div class="country-flag">${countryFlags[country] || '🌍'}</div>
-    <div>
+    <div style="min-width:0">
       <div class="country-name">${country}</div>
-      <div class="country-count">${count} member${count > 1 ? 's' : ''}</div>
+      <div class="country-count">${mems.length} member${mems.length > 1 ? 's' : ''}</div>
+      <div class="country-members">${names}</div>
     </div>`;
+  card.addEventListener('click', () => {
+    const coords = countryCoords[country];
+    if (coords) { map.setView(coords, 5, { animate: true }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  });
   countryList.appendChild(card);
 });
 </script>
