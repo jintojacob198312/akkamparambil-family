@@ -177,7 +177,7 @@ const FAMILY_MEMBERS = [
   },
   {
     id: 10,
-    name: "Jaime Laiju Akkamparambil",
+    name: "Jaimy Laiju Akkamparambil",
     nickname: "Jaime",
     parentId: null,
     spouseId: 9,
@@ -189,7 +189,7 @@ const FAMILY_MEMBERS = [
     profession: "Nurse",
     field: "Healthcare",
     bio: "A Loving MoM",
-    photo: "Photos/Jaime.jpeg",
+    photo: "Photos/Jaimy.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
 {
@@ -223,7 +223,7 @@ const FAMILY_MEMBERS = [
     profession: "Entrepreneur",
     field: "Business",
     bio: "A Loving Father",
-    photo: "Photos/Jisha.jpeg",
+    photo: "Photos/Anil.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
 {
@@ -347,7 +347,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 20,
-    name: "Annakkutti Antony Akkamparambil",
+    name: "Annakkutti Antony Naduvilapparambil",
     nickname: "Kochichechi",
     parentId: 1,
     spouseId: 21,
@@ -364,7 +364,7 @@ const FAMILY_MEMBERS = [
   },
   {
     id: 21,
-    name: "Antony Akkamparambil",
+    name: "Antony Naduvilapparambil",
     nickname: "Antony",
     parentId: null,
     spouseId: 20,
@@ -381,7 +381,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 22,
-    name: "Leemon Antony Akkamparambil",
+    name: "Leemon Antony Naduvilapparambil",
     nickname: "Lee",
     parentId: 20,
     spouseId: 23,
@@ -398,7 +398,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 23,
-    name: "Ancy Leemon Akkamparambil",
+    name: "Ancy Leemon Naduvilapparambil",
     nickname: "Ancy",
     parentId: null,
     spouseId: 22,
@@ -415,7 +415,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 24,
-    name: "Benett Antony Akkamparambil",
+    name: "Benett Antony Naduvilapparambil",
     nickname: "Benett",
     parentId: 20,
     spouseId: 25,
@@ -432,7 +432,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 25,
-    name: "Rekha Benett Akkamparambil",
+    name: "Rekha Benett Naduvilapparambil",
     nickname: "Rekha",
     parentId: null,
     spouseId: 24,
@@ -449,7 +449,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 26,
-    name: "Kid3 Antony Akkamparambil",
+    name: "Kid3 Antony Naduvilapparambil",
     nickname: "Kid3",
     parentId: 20,
     spouseId: null, //Sister-Nun
@@ -466,7 +466,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 27,
-    name: "Kid4 Antony Akkamparambil",
+    name: "Kid4 Antony Naduvilapparambil",
     nickname: "Kid4",
     parentId: 20,
     spouseId: 28,
@@ -483,7 +483,7 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 28,
-    name: "kid4 husband Antony Akkamparambil",
+    name: "kid4 Antony Naduvilapparambil",
     nickname: "Kid4",
     parentId: null,
     spouseId: 27,
@@ -546,7 +546,7 @@ const FAMILY_MEMBERS = [
     profession: "Service Sector",
     field: "Service",
     bio: "A loving Father",
-    photo: "",
+    photo: "Photos/Mathai.jpeg",
     contact: { email: "rajan@example.com", phone: "", whatsapp: "" }
   },
   {
