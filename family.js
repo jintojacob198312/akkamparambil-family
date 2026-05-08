@@ -449,9 +449,9 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 26,
-    name: "Kid3 Antony Naduvilapparambil",
+    name: "Kid1 Antony Naduvilapparambil",
     nickname: "Kid3",
-    parentId: 20,
+    parentId: 24,
     spouseId: null, //Sister-Nun
     generation: 3,
     born: 1980,
@@ -466,9 +466,9 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 27,
-    name: "Kid4 Antony Naduvilapparambil",
+    name: "Kid2 Antony Naduvilapparambil",
     nickname: "Kid4",
-    parentId: 20,
+    parentId: 24,
     spouseId: 28,
     generation: 3,
     born: 1983,
@@ -483,9 +483,9 @@ const FAMILY_MEMBERS = [
   },
 {
     id: 28,
-    name: "kid4 Antony Naduvilapparambil",
+    name: "kid3 Antony Naduvilapparambil",
     nickname: "Kid4",
-    parentId: null,
+    parentId: 24,
     spouseId: 27,
     generation: 3,
     born: 1983,
