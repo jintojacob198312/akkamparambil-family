@@ -610,7 +610,7 @@ const FAMILY_MEMBERS = [
     born: 1978,
     died: null,
     location: "Peruva, Kerala",
-    country: "UK",
+    country: "India",
     profession: "Pharmacist",
     field: "Healthcare",
     bio: "Senior pharmacist at an NHS hospital in London.",
