@@ -602,8 +602,8 @@ const FAMILY_MEMBERS = [
   },
   {
     id: 35,
-    name: "Kanjana Chacko Akkamparambil",
-    nickname: "Kanjamma",
+    name: "Kanjana Philip Munduvelil",
+    nickname: "Kanjanamma",
     parentId: 1,
     spouseId: 36,
     generation: 2,
@@ -834,6 +834,23 @@ const FAMILY_MEMBERS = [
     field: "Education",
     bio: "Cute as Mia",
     photo: "Photos/Mia.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
+  },
+  {
+    id: 49,
+    name: "Prince Philip Munduvelil",
+    nickname: "Prince",
+    parentId: 35,        // ✅ son of Jinto (id:3)
+    spouseId: 50,
+    generation: 4,
+    born: 1981,
+    died: null,
+    location: "Peruva, Kerala",
+    country: "Peruva",
+    profession: "Entrepreneur",
+    field: "Business",
+    bio: "Abcari :-)",
+    photo: "Photos/Prince.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   }
   // ── ADD NEW MEMBERS BELOW THIS LINE ──────────────────────────────
