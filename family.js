@@ -765,7 +765,7 @@ const FAMILY_MEMBERS = [
     profession: "Student",
     field: "Education",
     bio: "Cute as Serah",
-    photo: "Photos/Serah.jpg",
+    photo: "Photos/Serah.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
@@ -782,7 +782,7 @@ const FAMILY_MEMBERS = [
     profession: "Student",
     field: "Education",
     bio: "Cute as Serena",
-    photo: "Photos/Serah",
+    photo: "Photos/Serah.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
