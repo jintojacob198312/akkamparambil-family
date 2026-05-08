@@ -846,7 +846,7 @@ const FAMILY_MEMBERS = [
     born: 1981,
     died: null,
     location: "Peruva, Kerala",
-    country: "Peruva",
+    country: "India",
     profession: "Entrepreneur",
     field: "Business",
     bio: "Abcari :-)",
