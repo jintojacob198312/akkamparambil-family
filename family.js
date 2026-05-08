@@ -852,6 +852,24 @@ const FAMILY_MEMBERS = [
     bio: "Abcari :-)",
     photo: "Photos/Prince.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
+  },
+  
+  {
+    id: 51,
+    name: "Jackson Joseph Akkamparambil",
+    nickname: "Babuchettai",
+    parentId: 33,        // ✅ son of Jinto (id:3)
+    spouseId: 52,
+    generation: 3,
+    born: 1960,
+    died: null,
+    location: "Manama, Bahrain",
+    country: "Behrain",
+    profession: "Entrepreneur",
+    field: "Business",
+    bio: "A big shot",
+    photo: "Photos/Jackson.jpeg",
+    contact: { email: "", phone: "", whatsapp: "" }
   }
   // ── ADD NEW MEMBERS BELOW THIS LINE ──────────────────────────────
   // ,{
