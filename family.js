@@ -782,7 +782,7 @@ const FAMILY_MEMBERS = [
     profession: "Student",
     field: "Education",
     bio: "Cute as Serena",
-    photo: "Photos/Serah.jpeg",
+    photo: "Photos/Serena.jpeg",
     contact: { email: "", phone: "", whatsapp: "" }
   },
   {
