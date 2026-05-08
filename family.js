@@ -842,7 +842,7 @@ const FAMILY_MEMBERS = [
     nickname: "Prince",
     parentId: 35,        // ✅ son of Jinto (id:3)
     spouseId: 50,
-    generation: 4,
+    generation: 3,
     born: 1981,
     died: null,
     location: "Peruva, Kerala",
